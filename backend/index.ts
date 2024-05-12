@@ -1,98 +1,300 @@
-import cors from 'cors';
-import express, { NextFunction } from 'express';
-import {Client, QueryResult} from 'pg';
-import * as dotenv from 'dotenv';
-import bodyParser from 'body-parser';
-import { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import { uuid } from 'uuidv4';
-import cookieParser from 'cookie-parser';
+import cors from "cors";
+import express, { NextFunction } from "express";
+import { Client, QueryResult } from "pg";
+import * as dotenv from "dotenv";
+import bodyParser from "body-parser";
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import cookieParser from "cookie-parser";
 
-
-dotenv.config()
+dotenv.config();
 const PORT = process.env.PORT || 8080;
 const client = new Client({
-  connectionString: process.env.PGURI
+  connectionString: process.env.PGURI,
+});
+client.connect();
 
-})
-client.connect()
+const app = express();
 
-const app = express()
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser());
 
-app.use(cors())
-app.use(bodyParser.json())
-app.use(express.json())
-app.use(cookieParser())
-
-async function auth(request:Request, response:Response, next: NextFunction) {
-  const token: string = request.cookies.token
+//Middleware for authentication
+async function auth(request: Request, response: Response, next: NextFunction) {
+  const token: string = request.cookies.token;
   if (!token) {
-    response.status(401).send('Unauthorized: Not logged in')
-    return
+    return response.status(401).send("Unauthorized: Not logged in");
   }
-
-  const findToken = await client.query('SELECT * FROM tokens WHERE token = $1', [token])
-  if (!findToken) {
-    response.status(401).send('Unauthorized, verify session by login')
-    return
-  }
-  request.user = findToken.rows.user_id
-  next()
-
-}
-
-interface createAccount {
-  username: string,
-  email: string,
-  password: string
-}
-
-
-app.get('/', async (_request, response) => {
-  try {
-    const {rows} = await client.query('SELECT * FROM accounts')
-    response.send(rows)
-  } catch (error) {
-    console.error(error)
-    response.status(500).send('Server error at root')
-  }
-})
-
-app.post('/create-account', async (request:Request<createAccount>, response:Response) => {
 
   try {
-    const {username, email, password} = request.body
+    const findToken = await client.query(
+      "SELECT * FROM tokens WHERE token = $1",
+      [token]
+    );
 
-    if (!username || !password || !email) {
-      response.status(400).send('Invalid inputs')
-      return
+    if (findToken.rows.length === 0) {
+      return response.status(401).send("Unauthorized: please login");
     }
-
-    const existingUser: QueryResult = await client.query('SELECT * FROM accounts WHERE username = $1 OR email = $2', [username, email])
-
-    if (existingUser.rows.length > 0) {
-      response.status(409).send('User already exists')
-      return
-    }
-
-    const hashedPassword: string = await bcrypt.hash(password, 10)
-
-      await client.query('INSERT INTO accounts (username, password, email) VALUES ($1, $2, $3)',[username, hashedPassword, email])
-      response.status(201).send('Account successfully created').redirect('/login')
-
+    next();
   } catch (error) {
-console.error(error)
-response.status(500).send('Server error...')
+    console.error("Error during authentication: ", error);
+    return response.status(500).send("Server error");
   }
-})
+}
 
-app.post('/login', async (request:Request, response:Response) => {
+interface CreateAccount {
+  username: string;
+  email: string;
+  password: string;
+}
 
+interface LoginReq {
+  username: string;
+  password: string;
+}
 
-})
+interface User {
+  id: number;
+  username: string;
+  password: string;
+}
 
+interface Token {
+  id: number;
+  user_id: number;
+  token: string;
+}
 
+interface Catch {
+  id: number;
+  username: string;
+  species: string;
+  weight: number;
+  length: number;
+  c_r: number;
+  imgurl: string;
+  created: string;
+}
+
+app.get("/", async (_request, response) => {
+  try {
+    const { rows } = await client.query("SELECT * FROM accounts");
+    response.send(rows);
+  } catch (error) {
+    console.error(error);
+    response.status(500).send("Server error at root");
+  }
+});
+
+app.post(
+  "/create-account",
+  async (request: Request<CreateAccount>, response: Response) => {
+    try {
+      const { username, email, password } = request.body;
+
+      if (!username || !password || !email) {
+        response.status(400).send("Invalid inputs");
+        return;
+      }
+
+      const existingUser: QueryResult = await client.query(
+        "SELECT * FROM accounts WHERE username = $1 OR email = $2",
+        [username, email]
+      );
+
+      if (existingUser.rows.length > 0) {
+        response.status(409).send("User already exists");
+        return;
+      }
+
+      const hashedPassword: string = await bcrypt.hash(password, 10);
+
+      await client.query(
+        "INSERT INTO accounts (username, password, email) VALUES ($1, $2, $3)",
+        [username, hashedPassword, email]
+      );
+      response
+        .status(201)
+        .send("Account successfully created")
+        .redirect("/login");
+    } catch (error) {
+      console.error(error);
+      response.status(500).send("Server error...");
+    }
+  }
+);
+
+app.post("/login", async (request: Request<LoginReq>, response: Response) => {
+  if (request.cookies.token) {
+    return response.status(400).send("User is already logged in");
+  }
+
+  const { username, password }: User = request.body;
+  try {
+    const result: QueryResult<User> = await client.query<User>(
+      "SELECT * FROM accounts WHERE username = $1",
+      [username]
+    );
+    const user: User = result.rows[0];
+
+    if (!user) {
+      return response.status(401).send("Invalid username or password");
+    }
+    const checkPassword: boolean = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    if (!checkPassword) {
+      return response.status(401).send("Invalid username or password");
+    }
+
+    const token: string = uuidv4();
+
+    await client.query("INSERT INTO tokens (user_id, token) VALUES ($1, $2)", [
+      user.id,
+      token,
+    ]);
+    response.cookie("token", token, { httpOnly: true });
+    response.status(200).send("Login successful");
+  } catch (error) {
+    console.error("Login Error", error);
+    response.status(500).send("Server error at login");
+  }
+});
+
+app.get("/logout", auth, async (request: Request, response: Response) => {
+  try {
+    const token: string = request.cookies.token;
+
+    response.clearCookie("token");
+
+    await client.query<Token>("DELETE FROM tokens WHERE token = $1", [token]);
+
+    response.status(200).send("Logout successfull");
+  } catch (error) {
+    console.error("Error during logout: ", error);
+    response.status(500).send("Server error");
+  }
+});
+
+app.get("/leaderboard", async (_request: Request, response: Response) => {
+  try {
+    const { rows } = await client.query<Catch>(
+      "SELECT catches.id, accounts.username, catches.species, catches.weight, catches.length, catches.c_r, catches.imgurl, TO_CHAR(catches.created, 'YYYY-MM-DD HH24:MI') AS created FROM catches JOIN accounts ON catches.user_id = accounts.id ORDER BY catches.weight DESC"
+    );
+
+    response.status(200).send(rows);
+  } catch (error) {
+    console.error("Error getting results: ", error);
+    response.status(500).send("Server error");
+  }
+});
+
+app.post("/newCatch", auth, async (request: Request, response: Response) => {
+  try {
+    const token: string = request.cookies.token;
+    const userIdResult = await client.query<{ user_id: number }>(
+      "SELECT * FROM tokens WHERE token = $1",
+      [token]
+    );
+
+    if (!userIdResult || userIdResult.rows.length === 0) {
+      return response.status(401).send("Unauthorized");
+    }
+
+    const userId = userIdResult.rows[0].user_id;
+    const { species, weight, length, c_r, imgurl }: Catch = request.body;
+
+    await client.query<Catch>(
+      "INSERT INTO catches (user_id, species, weight, length, c_r, imgurl) VALUES ($1, $2, $3, $4, $5, $6)",
+      [userId, species, weight, length, c_r, imgurl]
+    );
+
+    response.status(201).send("Catch registred successfully");
+  } catch (error) {
+    console.error("Error: ", error);
+    response.status(500).send("Server error");
+  }
+});
+
+app.put(
+  "/updateCatch/:catchId",
+  auth,
+  async (request: Request, response: Response) => {
+    try {
+      const token: string = request.cookies.token;
+      const userIdResult = await client.query<{ user_id: number }>(
+        "SELECT * FROM tokens WHERE token = $1",
+        [token]
+      );
+
+      if (!userIdResult || userIdResult.rows.length === 0) {
+        return response.status(401).send("Unauthorized");
+      }
+
+      const userId = userIdResult.rows[0].user_id;
+
+      const catchId: number = parseInt(request.params.catchId, 10);
+      const catchResult = await client.query(
+        "SELECT user_id FROM catches WHERE id = $1",
+        [catchId]
+      );
+      if (!catchResult || !catchResult.rows || catchResult.rows.length === 0) {
+        return response.status(404).send("Catch not found");
+      }
+      if (catchResult.rows[0].user_id !== userId) {
+        return response.status(403).send("Permission to update catch, denied");
+      }
+
+      const updateFields: string[] = [];
+      const values: Catch[] = [];
+      let paramNumber = 1;
+
+      if ("species" in request.body) {
+        updateFields.push(`species = $${paramNumber}`);
+        values.push(request.body.species);
+        paramNumber++;
+      }
+
+      if ("weight" in request.body) {
+        updateFields.push(`weight = $${paramNumber}`);
+        values.push(request.body.weight);
+        paramNumber++;
+      }
+      if ("length" in request.body) {
+        updateFields.push(`length = $${paramNumber}`);
+        values.push(request.body.length);
+        paramNumber++;
+      }
+      if ("c_r" in request.body) {
+        updateFields.push(`c_r = $${paramNumber}`);
+        values.push(request.body.c_r);
+        paramNumber++;
+      }
+      if ("imgurl" in request.body) {
+        updateFields.push(`imgurl = $${paramNumber}`);
+        values.push(request.body.imgurl);
+        paramNumber++;
+      }
+
+      await client.query(
+        `UPDATE catches SET ${updateFields.join(
+          ","
+        )} WHERE id = $${paramNumber}`,
+        [...values, catchId]
+      );
+      response.status(201).send("Catch updated successfully");
+    } catch (error) {
+      console.error("Error ", error);
+      response.status(500).send("Server error");
+    }
+  }
+);
 
 app.listen(PORT, () => {
-  console.log(`Redo på http://localhost:${PORT}/`)
-})
+  console.log(`Redo på http://localhost:${PORT}/`);
+});
