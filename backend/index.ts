@@ -184,7 +184,7 @@ app.get("/logout", auth, async (request: Request, response: Response) => {
 app.get("/leaderboard", async (_request: Request, response: Response) => {
   try {
     const { rows } = await client.query<Catch>(
-      "SELECT catches.id, accounts.username, catches.species, catches.weight, catches.length, catches.c_r, catches.imgurl, TO_CHAR(catches.created, 'YYYY-MM-DD HH24:MI') AS created FROM catches JOIN accounts ON catches.user_id = accounts.id ORDER BY catches.weight DESC"
+      "SELECT catches.id, accounts.username, catches.species, catches.weight, catches.length, catches.c_r, catches.location, catches.imgurl, TO_CHAR(catches.created, 'YYYY-MM-DD HH24:MI') AS created FROM catches JOIN accounts ON catches.user_id = accounts.id ORDER BY catches.weight DESC"
     );
 
     response.status(200).send(rows);
