@@ -252,7 +252,7 @@ app.put(
 
       const updateFields: string[] = [];
       const values: Catch[] = [];
-      let paramNumber = 1;
+      let paramNumber: number = 1;
 
       if ("species" in request.body) {
         updateFields.push(`species = $${paramNumber}`);
