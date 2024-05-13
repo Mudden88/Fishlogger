@@ -1,48 +1,60 @@
-body {
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color: rgb(255, 255, 255);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+html body {
   background-image: url(../stories-ya8MPjFhx5k-unsplash.jpg);
   background-size: cover;
-  background-position: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
 }
+
 #root {
-  margin: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-header > h1 {
-  color: rgb(0, 0, 0);
+  padding: 10px;
 }
 
-nav {
+.container {
+  padding: 10px;
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  max-width: 700px;
+  /* From https://css.glass */
+  background: rgba(17, 15, 29, 0.322);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8.6px);
+  -webkit-backdrop-filter: blur(10.6px);
+  border: 1px solid rgba(255, 255, 255, 0.185);
 }
-.navList {
+
+.usersOnline {
+  align-self: flex-end;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 52px;
+}
+
+main {
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  list-style-type: none;
+  align-items: center;
+  margin: 10px;
 }
-
-li {
-  margin: auto;
-
-  a {
-    text-decoration: none;
-    color: black;
-    &:hover {
-      color: rgba(10, 0, 46, 0.8);
-    }
-  }
-}
-
-.vl {
-  width: 0.1em;
-  height: 1.5em;
-  background-color: #0000004d;
-  margin: 0 10px;
+h3,
+p {
+  align-self: start;
 }

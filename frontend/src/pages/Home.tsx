@@ -1,11 +1,26 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFish } from "@fortawesome/free-solid-svg-icons";
-import "../index.css";
+import { useState, useEffect } from "react";
 
 function Home() {
+  const [usersOnline, setUserOnline] = useState<number>(0);
+  const apiUrl: string = "http://localhost:3000/getUsers?getUser=mudden";
+
+  useEffect(() => {
+    try {
+      fetch(`${apiUrl}`)
+        .then((response) => response.json())
+        .then((result: number) => {
+          setUserOnline(result);
+        });
+    } catch (error) {
+      console.error("Error fetching users");
+    }
+  }, []);
   return (
     <>
       <div className='container'>
+        <span className='usersOnline'>Användare online: {usersOnline} </span>
         <h2>
           Välkommen till Fishlogger <FontAwesomeIcon icon={faFish} /> - Din
           digitala fiskelogg

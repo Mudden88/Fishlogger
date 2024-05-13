@@ -3,20 +3,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFish } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
+import Leaderboard from "./pages/Leaderboard";
 import "./App.css";
 
 function Root() {
   return (
     <>
-      <div className='siteWrapper'>
-        <h1>
-          FISHLOGGER <FontAwesomeIcon icon={faFish} />
-        </h1>
-        <main>
-          <Outlet />
-        </main>
+      <h1>
+        FISHLOGGER <FontAwesomeIcon icon={faFish} />
+      </h1>
+      <main>
+        <Outlet />
         <Navbar />
-      </div>
+      </main>
     </>
   );
 }
@@ -24,7 +23,10 @@ function Root() {
 function App() {
   const router = createBrowserRouter([
     {
-      children: [{ element: <Home />, path: "/" }],
+      children: [
+        { element: <Home />, path: "/" },
+        { element: <Leaderboard />, path: "/Leaderboard" },
+      ],
       element: <Root />,
     },
   ]);
