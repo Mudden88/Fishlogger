@@ -37,6 +37,7 @@ function Leaderboard() {
     <>
       <div className='Lcontainer'>
         <h1>LEADERBOARD</h1>
+        <p>Topp 100</p>
         {loading ? (
           <p>Laddar resultat...</p>
         ) : (

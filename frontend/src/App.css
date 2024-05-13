@@ -7,11 +7,15 @@
   -moz-osx-font-smoothing: grayscale;
   box-sizing: border-box;
 }
+html {
+  min-height: 100dvh;
+}
 html body {
   background-image: url(../stories-ya8MPjFhx5k-unsplash.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  margin: 0;
 }
 
 #root {
@@ -19,7 +23,6 @@ html body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 10px;
 }
 
 .container {
@@ -41,10 +44,6 @@ html body {
 .usersOnline {
   align-self: flex-end;
   font-size: 12px;
-}
-
-h1 {
-  font-size: 52px;
 }
 
 main {

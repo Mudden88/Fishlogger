@@ -1,5 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFish } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect } from "react";
 
 function Home() {
@@ -21,16 +19,13 @@ function Home() {
     <>
       <div className='container'>
         <span className='usersOnline'>Användare online: {usersOnline} </span>
-        <h2>
-          Välkommen till Fishlogger <FontAwesomeIcon icon={faFish} /> - Din
-          digitala fiskelogg
-        </h2>
+        <h2>Välkommen till Fishlogger - Din digitala fiskelogg</h2>
 
         <h3>Registrera dina fångster</h3>
         <p>
           Logga dina fisketurer och registrera varje fångst med detaljer som
           fiskart, vikt, längd och bild. Bygg upp din egen personliga
-          fiskdatabas och få en överblick över din utveckling som fiskare.
+          fångstdatabas och få en överblick över din utveckling som fiskare.
         </p>
         <h3>För statistik över dina fiskeäventyr</h3>
         <p>
