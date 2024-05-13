@@ -295,6 +295,22 @@ app.put(
   }
 );
 
+app.get("/getUsers", async (request: Request, response: Response) => {
+  const getUser = request.query.getUser;
+
+  if (getUser !== "mudden") {
+    response.status(401).send("Unauthorized request");
+  }
+  try {
+    const { rows } = await client.query("SELECT COUNT(*) FROM tokens");
+    const count = rows[0].count;
+    response.status(200).send(count);
+  } catch (error) {
+    console.error("Error fetching user count", error);
+    response.status(500).send("Server error");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Redo på http://localhost:${PORT}/`);
 });
