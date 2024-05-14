@@ -45,6 +45,7 @@ async function auth(request: Request, response: Response, next: NextFunction) {
   }
 }
 
+//Interfaces
 interface CreateAccount {
   username: string;
   email: string;
@@ -78,11 +79,11 @@ interface Catch {
   imgurl: string;
   created: string;
 }
-
+//Routes
 app.get("/", async (_request, response) => {
   try {
-    const { rows } = await client.query("SELECT * FROM accounts");
-    response.send(rows);
+    const message: string = "Hello this is the server";
+    response.send(message);
   } catch (error) {
     console.error(error);
     response.status(500).send("Server error at root");
@@ -116,10 +117,7 @@ app.post(
         "INSERT INTO accounts (username, password, email) VALUES ($1, $2, $3)",
         [username, hashedPassword, email]
       );
-      response
-        .status(201)
-        .send("Account successfully created")
-        .redirect("/login");
+      response.status(201).send("Account successfully created");
     } catch (error) {
       console.error(error);
       response.status(500).send("Server error...");
@@ -128,12 +126,16 @@ app.post(
 );
 
 app.post("/login", async (request: Request<LoginReq>, response: Response) => {
-  if (request.cookies.token) {
-    return response.status(400).send("User is already logged in");
-  }
-
   const { username, password }: User = request.body;
   try {
+    const existingUser: QueryResult<Token> = await client.query<Token>(
+      "SELECT * FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1)",
+      [username]
+    );
+    if (existingUser.rows.length > 0) {
+      return response.status(400).send("User is already logged in");
+    }
+
     const result: QueryResult<User> = await client.query<User>(
       "SELECT * FROM accounts WHERE username = $1",
       [username]
@@ -141,7 +143,7 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
     const user: User = result.rows[0];
 
     if (!user) {
-      return response.status(401).send("Invalid username or password");
+      return response.status(404).send("Invalid username or password");
     }
     const checkPassword: boolean = await bcrypt.compare(
       password,
@@ -149,7 +151,7 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
     );
 
     if (!checkPassword) {
-      return response.status(401).send("Invalid username or password");
+      return response.status(401).send("Invalid password");
     }
 
     const token: string = uuidv4();
@@ -159,7 +161,7 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
       token,
     ]);
     response.cookie("token", token, { httpOnly: true });
-    response.status(200).send("Login successful");
+    response.status(201).send("Login successful");
   } catch (error) {
     console.error("Login Error", error);
     response.status(500).send("Server error at login");
