@@ -1,17 +1,25 @@
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  RouterProvider,
+} from "react-router-dom";
+import { AuthContext } from "./context/AuthProvider";
+import { useContext } from "react";
 import { ToastContainer } from "react-toastify";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import Login from "./pages/login/Login";
 import CreateAccount from "./pages/createaccount/CreateAccount";
+import Profile from "./pages/profile/Profile";
 import "./App.css";
 
 function Root() {
   return (
     <>
       <Navbar />
-      <ToastContainer position='top-right' autoClose={6000} theme='dark' />
+      <ToastContainer position='top-right' autoClose={2000} theme='dark' />
       <main>
         <Outlet />
       </main>
@@ -20,6 +28,8 @@ function Root() {
 }
 
 function App() {
+  const { loggedIn } = useContext(AuthContext);
+
   const router = createBrowserRouter([
     {
       children: [
@@ -27,6 +37,10 @@ function App() {
         { element: <Leaderboard />, path: "/Leaderboard" },
         { element: <Login />, path: "/Login" },
         { element: <CreateAccount />, path: "/CreateAccount" },
+        {
+          element: loggedIn ? <Profile /> : <Navigate to='/login' replace />,
+          path: "/Profile",
+        },
       ],
       element: <Root />,
     },

@@ -22,19 +22,19 @@ function Home() {
         <h2>Välkommen till Fishlogger - Din digitala fiskelogg</h2>
 
         <h3>Registrera dina fiskefångster</h3>
-        <p>
+        <p className='paragraph'>
           Dokumentera dina fisketurer och spara varje fångst med detaljer som
           fiskart, vikt, längd och bilder. Bygg upp din personliga
           fångststatistik och få en överblick över din utveckling som fiskare.
         </p>
         <h3>Få djupgående statistik om dina fiskeäventyr</h3>
-        <p>
+        <p className='paragraph'>
           Utforska detaljerad statistik över dina fisketurer. Upptäck trender
           och fångstfrekvenser för att optimera ditt fiske och öka dina chanser
           att fånga den stora fisken!
         </p>
         <h3>Jämför dig med andra passionerade fiskare</h3>
-        <p>
+        <p className='paragraph'>
           Dina fiskeupplevelser syns på en global rankinglista där du kan
           jämföra dig med andra fiskare. Sortera listan efter art, vikt eller
           längd för att se vem som för närvarande toppar. Stig i rank genom att

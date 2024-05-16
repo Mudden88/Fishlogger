@@ -70,3 +70,9 @@ label input {
   text-align: center;
   margin-top: 5px;
 }
+
+.errormsg {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+}

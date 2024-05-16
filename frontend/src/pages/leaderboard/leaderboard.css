@@ -2,7 +2,6 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   width: fit-content;
   /* From https://css.glass */
@@ -50,8 +49,4 @@ a {
   &:hover {
     color: rgba(0, 0, 0, 0.233);
   }
-}
-
-.fishIco {
-  transform: rotate(180deg);
 }
