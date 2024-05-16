@@ -29,7 +29,6 @@ function Root() {
 
 function App() {
   const { loggedIn } = useContext(AuthContext);
-
   const router = createBrowserRouter([
     {
       children: [

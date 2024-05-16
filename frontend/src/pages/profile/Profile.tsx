@@ -3,7 +3,7 @@ import "./profile.css";
 
 function Profile() {
   const token = localStorage.getItem("isLoggedIn");
-  const [user, setUser] = useState<userProfile | null>(null); // Börja med att sätta user till null
+  const [users, setUsers] = useState<userProfile[]>([]);
 
   interface userProfile {
     username: string;
@@ -14,6 +14,7 @@ function Profile() {
     c_r: number;
     password: string;
     token: string;
+    user_id: number;
   }
 
   useEffect(() => {
@@ -21,29 +22,37 @@ function Profile() {
       fetch(`http://localhost:3000/userProfile?token=${token}`)
         .then((response) => response.json())
         .then((result) => {
-          setUser(result);
+          setUsers(result);
         })
         .catch((error) => {
           console.error("Error fetching user profile:", error);
-          setUser(null);
+          setUsers([]);
         });
     }
   }, [token]);
 
   return (
     <>
-      {token ? (
-        user ? (
-          <div className='user-profile'>
-            <h1>Hejsan</h1>
-            <p>Email: {user.token}</p>
-          </div>
+      <div className='container'>
+        {token ? (
+          users.length > 0 ? (
+            users.map((user, index) => (
+              <div className='user-profile' key={index}>
+                <h2>{user.username}</h2>
+                <p>Email: {user.email}</p>
+                <h3>Dina fångster:</h3>
+                <p>Art: {user.species}</p>
+
+                <p>Vikt: {user.weight}</p>
+              </div>
+            ))
+          ) : (
+            <p>Laddar användare</p>
+          )
         ) : (
-          <p>Laddar användare</p>
-        )
-      ) : (
-        <p>Du behöver logga in för att komma åt den här sidan</p>
-      )}
+          <p>Du behöver logga in för att komma åt den här sidan</p>
+        )}
+      </div>
     </>
   );
 }

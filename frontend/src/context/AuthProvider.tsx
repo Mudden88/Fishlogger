@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 type Props = {
   children?: ReactNode;
@@ -18,7 +18,14 @@ const AuthContext = createContext<IAuthContext>(initialValue);
 
 const AuthProvider = ({ children }: Props) => {
   const [loggedIn, setLoggedIn] = useState(initialValue.loggedIn);
-
+  useEffect(() => {
+    const token = localStorage.getItem("isLoggedIn");
+    if (token) {
+      setLoggedIn(true);
+    } else {
+      setLoggedIn(false);
+    }
+  }, []);
   return (
     <AuthContext.Provider value={{ loggedIn, setLoggedIn }}>
       {children}
