@@ -6,7 +6,6 @@ import bodyParser from "body-parser";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 const PORT = process.env.PORT || 8080;
@@ -20,15 +19,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cookieParser());
 
 //Middleware for authentication
 async function auth(request: Request, response: Response, next: NextFunction) {
-  const token: string = request.cookies.token;
-  if (!token) {
-    return response.status(401).send("Unauthorized: Not logged in");
-  }
-
+  const token = request.query.token;
   try {
     const findToken = await client.query(
       "SELECT * FROM tokens WHERE token = $1",
@@ -79,6 +73,18 @@ interface Catch {
   imgurl: string;
   created: string;
 }
+
+interface userProfile {
+  username: string;
+  email: string;
+  species: string;
+  weight: number;
+  length: number;
+  c_r: number;
+  password: string;
+  token: string;
+  user_id: number;
+}
 //Routes
 app.get("/", async (_request, response) => {
   try {
@@ -126,8 +132,9 @@ app.post(
 );
 
 app.post("/login", async (request: Request<LoginReq>, response: Response) => {
-  const { username, password }: User = request.body;
   try {
+    const { username, password }: User = request.body;
+
     const existingUser: QueryResult<Token> = await client.query<Token>(
       "SELECT * FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1)",
       [username]
@@ -160,22 +167,18 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
       user.id,
       token,
     ]);
-    response.cookie("token", token, { httpOnly: true });
-    response.status(201).send("Login successful");
+    response.status(201).send({ token: token });
   } catch (error) {
     console.error("Login Error", error);
     response.status(500).send("Server error at login");
   }
 });
 
-app.get("/logout", auth, async (request: Request, response: Response) => {
+app.delete("/logout", auth, async (request: Request, response: Response) => {
   try {
-    const token: string = request.cookies.token;
-
-    response.clearCookie("token");
+    const token = request.query.token;
 
     await client.query<Token>("DELETE FROM tokens WHERE token = $1", [token]);
-
     response.status(200).send("Logout successfull");
   } catch (error) {
     console.error("Error during logout: ", error);
@@ -198,7 +201,7 @@ app.get("/leaderboard", async (_request: Request, response: Response) => {
 
 app.post("/newCatch", auth, async (request: Request, response: Response) => {
   try {
-    const token: string = request.cookies.token;
+    const token = request.query.token;
     const userIdResult = await client.query<{ user_id: number }>(
       "SELECT * FROM tokens WHERE token = $1",
       [token]
@@ -310,6 +313,32 @@ app.get("/getUsers", async (request: Request, response: Response) => {
   } catch (error) {
     console.error("Error fetching user count", error);
     response.status(500).send("Server error");
+  }
+});
+
+app.get("/userProfile", auth, async (request: Request, response: Response) => {
+  try {
+    const token = request.query.token;
+    const getToken = await client.query(
+      "SELECT * FROM tokens WHERE token =$1",
+      [token]
+    );
+    const validateToken = getToken.rows[0];
+
+    const userId: number = validateToken.user_id;
+
+    const { rows }: QueryResult<userProfile> = await client.query(
+      "SELECT accounts.id, accounts.username, accounts.email, accounts.created, catches.*, tokens.* FROM accounts LEFT JOIN catches ON accounts.id = catches.user_id JOIN tokens ON accounts.id = tokens.user_id WHERE accounts.id = $1",
+      [userId]
+    );
+    if (token !== validateToken.token) {
+      response.status(401).send("Not authorized");
+    } else if (token === validateToken.token) {
+      response.status(200).send(rows);
+    }
+  } catch (error) {
+    console.error("Error fetching userprofile ", error);
+    response.status(500).send("Server Error");
   }
 });
 
