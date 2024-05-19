@@ -328,9 +328,30 @@ app.get("/userProfile", auth, async (request: Request, response: Response) => {
     const userId: number = validateToken.user_id;
 
     const { rows }: QueryResult<userProfile> = await client.query(
-      "SELECT accounts.id, accounts.username, accounts.email, accounts.created, catches.*, tokens.* FROM accounts LEFT JOIN catches ON accounts.id = catches.user_id JOIN tokens ON accounts.id = tokens.user_id WHERE accounts.id = $1",
+      `
+      SELECT
+        accounts.id,
+        accounts.username,
+        accounts.email,
+        TO_CHAR(accounts.created, 'YYYY-MM-DD') AS account_created,
+        catches.*,
+        tokens.*
+      FROM
+        accounts
+      LEFT JOIN
+        catches
+      ON
+        accounts.id = catches.user_id
+      JOIN
+        tokens
+      ON
+        accounts.id = tokens.user_id
+      WHERE
+        accounts.id = $1
+      `,
       [userId]
     );
+
     if (token !== validateToken.token) {
       response.status(401).send("Not authorized");
     } else if (token === validateToken.token) {
@@ -341,6 +362,28 @@ app.get("/userProfile", auth, async (request: Request, response: Response) => {
     response.status(500).send("Server Error");
   }
 });
+
+app.get(
+  "/userCatches/:userId",
+  auth,
+  async (request: Request, response: Response) => {
+    try {
+      const userId: number = parseInt(request.params.userId, 10);
+      if (!userId) {
+        response.status(401).send("Unauthorized request");
+      }
+
+      const { rows } = await client.query(
+        "SELECT id, user_id, species, weight, weight, length, c_r, imgurl, TO_CHAR(created, 'YYYY-MM-DD HH24:MI') AS catch_created FROM catches WHERE user_id = $1 ORDER BY id DESC",
+        [userId]
+      );
+      response.status(200).send(rows);
+    } catch (error) {
+      console.error("Error", error);
+      response.status(500).send("Server error");
+    }
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`Redo på http://localhost:${PORT}/`);
