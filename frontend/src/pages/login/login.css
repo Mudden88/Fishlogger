@@ -72,7 +72,12 @@ label input {
 }
 
 .errormsg {
-  color: red;
-  font-size: 14px;
+  color: rgb(250, 98, 98);
+  width: fit-content;
+  place-self: center;
+  font-size: 12px;
+  font-weight: 700;
   text-align: center;
+  padding: 10px;
+  border-radius: 10px;
 }
