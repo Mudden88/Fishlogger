@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFish } from "@fortawesome/free-solid-svg-icons";
+import RegisterCatch from "../../components/RegisterCatch";
 import "./profile.css";
 
 function Profile() {
@@ -8,7 +9,6 @@ function Profile() {
 
   const [user, setUser] = useState<userProfile | null>(null);
   const [catches, setCatches] = useState<UserCatch[] | null>(null);
-  const [add, setAdd] = useState<boolean>(false);
 
   interface userProfile {
     id: number;
@@ -59,12 +59,6 @@ function Profile() {
     }
   }, [token, user]);
 
-  const handleClick = () => {
-    if (add === false) {
-      setAdd(true);
-    }
-  };
-
   return (
     <div className='container-profile'>
       {token ? (
@@ -82,18 +76,15 @@ function Profile() {
               <p className='userMail'>
                 Email: {user.email} <br />
               </p>
+              <p className='userPw'>Byt lösenord</p>
               <p className='userCreated'>
                 Medlem sedan: {user.account_created}
               </p>
               <hr />
-              <input
-                className='button-41'
-                type='button'
-                value='Lägg till'
-                onClick={handleClick}
-              />
             </div>
+
             <div className='userCatches'>
+              <RegisterCatch />
               {catches && catches.length > 0 ? (
                 catches.map((fish) => (
                   <div key={fish.id} className='catchItem'>
@@ -132,7 +123,7 @@ function Profile() {
                             <td>{fish.weight} gr</td>
                             <td>{fish.length} cm</td>
                             <td>{fish.c_r === 1 ? "Ja" : "Nej"}</td>
-                            <td>{fish.location ? fish.location : "n/a"} </td>
+                            <td>{fish.location}</td>
                           </tr>
                         </tbody>
                       </table>

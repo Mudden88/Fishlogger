@@ -1,0 +1,17 @@
+.closeModal {
+  cursor: pointer;
+  position: absolute;
+  top: -10px;
+  right: 20px;
+}
+.regForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.regForm label input {
+  background-color: white;
+  color: black;
+  font-weight: 700;
+  padding: 5px;
+}

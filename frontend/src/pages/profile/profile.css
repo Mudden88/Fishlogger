@@ -48,8 +48,18 @@
   margin: 0;
 }
 
-.userCreated {
+.userPw {
   grid-row: 4;
+  grid-column: 1 / span 3;
+  font-size: 12px;
+  color: rgba(85, 85, 85, 0.5);
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.userCreated {
+  grid-row: 5;
   grid-column: 1 / span 3;
   font-size: 12px;
   color: rgba(85, 85, 85, 0.5);
@@ -58,14 +68,14 @@
 }
 
 hr {
-  grid-row: 5;
+  grid-row: 6;
   grid-column: 1 / span 4;
   width: 100%;
   color: rgba(85, 85, 85, 0.2);
 }
 
 .Latest {
-  grid-row: 7;
+  grid-row: 8;
   grid-column: 1 / span 4;
   font-size: 14px;
 }
@@ -85,8 +95,6 @@ hr {
 }
 
 .button-41 {
-  grid-row: 6;
-  grid-column: 1 / span 4;
   place-self: center;
   background-color: initial;
   background-image: linear-gradient(-180deg, #00d775, #00bd68);
@@ -97,7 +105,7 @@ hr {
   display: inline-block;
   font-family: Inter, -apple-system, system-ui, Roboto, "Helvetica Neue", Arial,
     sans-serif;
-  height: 32px;
+  height: 38px;
   outline: 0;
   overflow: hidden;
   pointer-events: auto;
@@ -106,7 +114,7 @@ hr {
   user-select: none;
   -webkit-user-select: none;
   white-space: nowrap;
-  width: 80px;
+  width: fit-content;
   font-size: 12px;
   border: 0;
   margin: 10px 0;
@@ -125,6 +133,7 @@ hr {
 .fishImg {
   margin-bottom: 10px;
   max-width: 350px;
+  max-height: 280px;
   border-radius: 16px;
 }
 
@@ -138,7 +147,7 @@ hr {
 
 .created {
   font-size: 12px;
-  color: rgba(85, 85, 85, 0.6);
+  color: rgba(0, 0, 0, 0.8);
 }
 table {
   border-collapse: collapse;
