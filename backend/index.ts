@@ -6,7 +6,6 @@ import bodyParser from "body-parser";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 const PORT = process.env.PORT || 8080;
@@ -20,15 +19,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 
 //Middleware for authentication
 async function auth(request: Request, response: Response, next: NextFunction) {
-  const token: string = request.cookies.token;
-  if (!token) {
-    return response.status(401).send("Unauthorized: Not logged in");
-  }
-
+  const token = request.query.token;
   try {
     const findToken = await client.query(
       "SELECT * FROM tokens WHERE token = $1",
@@ -45,6 +40,7 @@ async function auth(request: Request, response: Response, next: NextFunction) {
   }
 }
 
+//Interfaces
 interface CreateAccount {
   username: string;
   email: string;
@@ -77,12 +73,25 @@ interface Catch {
   c_r: number;
   imgurl: string;
   created: string;
+  location: string;
 }
 
+interface userProfile {
+  username: string;
+  email: string;
+  species: string;
+  weight: number;
+  length: number;
+  c_r: number;
+  password: string;
+  token: string;
+  user_id: number;
+}
+//Routes
 app.get("/", async (_request, response) => {
   try {
-    const { rows } = await client.query("SELECT * FROM accounts");
-    response.send(rows);
+    const message: string = "Hello this is the server";
+    response.send(message);
   } catch (error) {
     console.error(error);
     response.status(500).send("Server error at root");
@@ -116,10 +125,7 @@ app.post(
         "INSERT INTO accounts (username, password, email) VALUES ($1, $2, $3)",
         [username, hashedPassword, email]
       );
-      response
-        .status(201)
-        .send("Account successfully created")
-        .redirect("/login");
+      response.status(201).send("Account successfully created");
     } catch (error) {
       console.error(error);
       response.status(500).send("Server error...");
@@ -128,12 +134,17 @@ app.post(
 );
 
 app.post("/login", async (request: Request<LoginReq>, response: Response) => {
-  if (request.cookies.token) {
-    return response.status(400).send("User is already logged in");
-  }
-
-  const { username, password }: User = request.body;
   try {
+    const { username, password }: User = request.body;
+
+    const existingUser: QueryResult<Token> = await client.query<Token>(
+      "SELECT * FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1)",
+      [username]
+    );
+    if (existingUser.rows.length > 0) {
+      return response.status(400).send("User is already logged in");
+    }
+
     const result: QueryResult<User> = await client.query<User>(
       "SELECT * FROM accounts WHERE username = $1",
       [username]
@@ -141,7 +152,7 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
     const user: User = result.rows[0];
 
     if (!user) {
-      return response.status(401).send("Invalid username or password");
+      return response.status(404).send("Invalid username or password");
     }
     const checkPassword: boolean = await bcrypt.compare(
       password,
@@ -149,7 +160,7 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
     );
 
     if (!checkPassword) {
-      return response.status(401).send("Invalid username or password");
+      return response.status(401).send("Invalid password");
     }
 
     const token: string = uuidv4();
@@ -158,22 +169,18 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
       user.id,
       token,
     ]);
-    response.cookie("token", token, { httpOnly: true });
-    response.status(200).send("Login successful");
+    response.status(201).send({ token: token });
   } catch (error) {
     console.error("Login Error", error);
     response.status(500).send("Server error at login");
   }
 });
 
-app.get("/logout", auth, async (request: Request, response: Response) => {
+app.delete("/logout", auth, async (request: Request, response: Response) => {
   try {
-    const token: string = request.cookies.token;
-
-    response.clearCookie("token");
+    const token = request.query.token;
 
     await client.query<Token>("DELETE FROM tokens WHERE token = $1", [token]);
-
     response.status(200).send("Logout successfull");
   } catch (error) {
     console.error("Error during logout: ", error);
@@ -184,7 +191,7 @@ app.get("/logout", auth, async (request: Request, response: Response) => {
 app.get("/leaderboard", async (_request: Request, response: Response) => {
   try {
     const { rows } = await client.query<Catch>(
-      "SELECT catches.id, accounts.username, catches.species, catches.weight, catches.length, catches.c_r, catches.imgurl, TO_CHAR(catches.created, 'YYYY-MM-DD HH24:MI') AS created FROM catches JOIN accounts ON catches.user_id = accounts.id ORDER BY catches.weight DESC"
+      "SELECT catches.id, accounts.username, catches.species, catches.weight, catches.length, catches.c_r, catches.location, catches.imgurl, TO_CHAR(catches.created, 'YYYY-MM-DD HH24:MI') AS created FROM catches JOIN accounts ON catches.user_id = accounts.id ORDER BY catches.weight DESC"
     );
 
     response.status(200).send(rows);
@@ -196,7 +203,7 @@ app.get("/leaderboard", async (_request: Request, response: Response) => {
 
 app.post("/newCatch", auth, async (request: Request, response: Response) => {
   try {
-    const token: string = request.cookies.token;
+    const token = request.query.token;
     const userIdResult = await client.query<{ user_id: number }>(
       "SELECT * FROM tokens WHERE token = $1",
       [token]
@@ -207,11 +214,13 @@ app.post("/newCatch", auth, async (request: Request, response: Response) => {
     }
 
     const userId = userIdResult.rows[0].user_id;
-    const { species, weight, length, c_r, imgurl }: Catch = request.body;
+
+    const { species, weight, length, c_r, imgurl, location }: Catch =
+      request.body;
 
     await client.query<Catch>(
-      "INSERT INTO catches (user_id, species, weight, length, c_r, imgurl) VALUES ($1, $2, $3, $4, $5, $6)",
-      [userId, species, weight, length, c_r, imgurl]
+      "INSERT INTO catches (user_id, species, weight, length, c_r, imgurl, location) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [userId, species, weight, length, c_r ? 1 : 0, imgurl, location]
     );
 
     response.status(201).send("Catch registred successfully");
@@ -252,7 +261,7 @@ app.put(
 
       const updateFields: string[] = [];
       const values: Catch[] = [];
-      let paramNumber = 1;
+      let paramNumber: number = 1;
 
       if ("species" in request.body) {
         updateFields.push(`species = $${paramNumber}`);
@@ -290,6 +299,91 @@ app.put(
       response.status(201).send("Catch updated successfully");
     } catch (error) {
       console.error("Error ", error);
+      response.status(500).send("Server error");
+    }
+  }
+);
+
+app.get("/getUsers", async (request: Request, response: Response) => {
+  const getUser = request.query.getUser;
+
+  if (getUser !== "mudden") {
+    response.status(401).send("Unauthorized request");
+  }
+  try {
+    const { rows } = await client.query("SELECT COUNT(*) FROM tokens");
+    const count = rows[0].count;
+    response.status(200).send(count);
+  } catch (error) {
+    console.error("Error fetching user count", error);
+    response.status(500).send("Server error");
+  }
+});
+
+app.get("/userProfile", auth, async (request: Request, response: Response) => {
+  try {
+    const token = request.query.token;
+    const getToken = await client.query(
+      "SELECT * FROM tokens WHERE token =$1",
+      [token]
+    );
+    const validateToken = getToken.rows[0];
+
+    const userId: number = validateToken.user_id;
+
+    const { rows }: QueryResult<userProfile> = await client.query(
+      `
+      SELECT
+        accounts.id,
+        accounts.username,
+        accounts.email,
+        TO_CHAR(accounts.created, 'YYYY-MM-DD') AS account_created,
+        catches.*,
+        tokens.*
+      FROM
+        accounts
+      LEFT JOIN
+        catches
+      ON
+        accounts.id = catches.user_id
+      JOIN
+        tokens
+      ON
+        accounts.id = tokens.user_id
+      WHERE
+        accounts.id = $1
+      `,
+      [userId]
+    );
+
+    if (token !== validateToken.token) {
+      response.status(401).send("Not authorized");
+    } else if (token === validateToken.token) {
+      response.status(200).send(rows);
+    }
+  } catch (error) {
+    console.error("Error fetching userprofile ", error);
+    response.status(500).send("Server Error");
+  }
+});
+
+app.get(
+  "/userCatches/:userId",
+  auth,
+  async (request: Request, response: Response) => {
+    try {
+      const userId: number = parseInt(request.params.userId, 10);
+      if (!userId) {
+        response.status(401).send("Unauthorized request");
+      }
+
+      const { rows } = await client.query(
+        "SELECT id, user_id, species, weight, weight, length, c_r, location, imgurl, TO_CHAR(created, 'YYYY-MM-DD HH24:MI') AS catch_created FROM catches WHERE user_id = $1 ORDER BY id DESC",
+        [userId]
+      );
+      response.status(200).send(rows);
+    } catch (error) {
+      console.error("Error", error);
       response.status(500).send("Server error");
     }
   }

@@ -1,0 +1,52 @@
+.Lcontainer {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  /* From https://css.glass */
+  background: rgba(17, 15, 29, 0.322);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8.6px);
+  -webkit-backdrop-filter: blur(10.6px);
+  border: 1px solid rgba(255, 255, 255, 0.185);
+}
+.leaderboard-results {
+  text-align: left;
+  border-collapse: collapse;
+}
+.leaderboard-results thead th {
+  background: rgba(38, 0, 255, 0.5);
+  padding: 25px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.leaderboard-results tbody td {
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom-color: 1px solid rgba(255, 255, 255, 0.31);
+}
+
+.leaderboard-results tbody tr:hover td {
+  background: rgba(72, 84, 255, 0.6);
+}
+
+.leaderboard-results tbody tr:nth-child(1) {
+  background-color: rgba(0, 195, 255, 0.425);
+}
+
+.imgurl {
+  font-weight: 800;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+  &:hover {
+    color: rgba(0, 0, 0, 0.233);
+  }
+}

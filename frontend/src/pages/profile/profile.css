@@ -1,0 +1,162 @@
+.container-profile {
+  width: 370px;
+  max-height: 950px;
+  overflow: scroll;
+  background-color: white;
+  border-radius: 16px;
+}
+
+.user-profile {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  color: black;
+  margin: 10px;
+}
+
+.userName {
+  font-size: 14px;
+  grid-row: 1;
+  grid-column: 1;
+}
+.fishIcon {
+  grid-row: 1;
+  grid-column: 2 / span 3;
+  margin: 2px 0 0 5px;
+}
+
+.ProfilePic {
+  height: 42px;
+  grid-column: 4;
+  grid-row: 1;
+  place-self: center;
+}
+
+.userId {
+  grid-column: 1 / span 3;
+  grid-row: 2;
+  font-size: 12px;
+  color: rgba(85, 85, 85, 0.5);
+  padding: 0;
+  margin: 0;
+}
+.userMail {
+  grid-row: 3;
+  grid-column: 1 / span 3;
+  font-size: 12px;
+  color: rgba(85, 85, 85, 0.5);
+  padding: 0;
+  margin: 0;
+}
+
+.userPw {
+  grid-row: 4;
+  grid-column: 1 / span 3;
+  font-size: 12px;
+  color: rgba(85, 85, 85, 0.5);
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.userCreated {
+  grid-row: 5;
+  grid-column: 1 / span 3;
+  font-size: 12px;
+  color: rgba(85, 85, 85, 0.5);
+  padding: 0;
+  margin: 0;
+}
+
+hr {
+  grid-row: 6;
+  grid-column: 1 / span 4;
+  width: 100%;
+  color: rgba(85, 85, 85, 0.2);
+}
+
+.Latest {
+  grid-row: 8;
+  grid-column: 1 / span 4;
+  font-size: 14px;
+}
+
+.userCatches {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 350px;
+  margin: 10px;
+}
+
+.noFish {
+  font-size: 14px;
+  color: rgba(85, 85, 85, 0.6);
+}
+
+.button-41 {
+  place-self: center;
+  background-color: initial;
+  background-image: linear-gradient(-180deg, #00d775, #00bd68);
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Inter, -apple-system, system-ui, Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  height: 38px;
+  outline: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  text-align: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  width: fit-content;
+  font-size: 12px;
+  border: 0;
+  margin: 10px 0;
+}
+
+.button-41:hover {
+  background: #00bd68;
+  &:active {
+    transform: scale(1.05);
+  }
+}
+.catchItem {
+  text-align: center;
+  margin: 0;
+}
+.fishImg {
+  margin-bottom: 10px;
+  max-width: 350px;
+  max-height: 280px;
+  border-radius: 16px;
+}
+
+.fishInfo {
+  font-size: 14px;
+  background-color: #dbdbdba1;
+  border-radius: 10px;
+  padding: 5px;
+  color: black;
+}
+
+.created {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.8);
+}
+table {
+  border-collapse: collapse;
+  text-align: left;
+
+  width: 350px;
+  font-size: 12px;
+}
+
+thead {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
