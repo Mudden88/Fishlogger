@@ -19,6 +19,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 //Middleware for authentication
 async function auth(request: Request, response: Response, next: NextFunction) {
@@ -72,6 +73,7 @@ interface Catch {
   c_r: number;
   imgurl: string;
   created: string;
+  location: string;
 }
 
 interface userProfile {
@@ -212,11 +214,13 @@ app.post("/newCatch", auth, async (request: Request, response: Response) => {
     }
 
     const userId = userIdResult.rows[0].user_id;
-    const { species, weight, length, c_r, imgurl }: Catch = request.body;
+
+    const { species, weight, length, c_r, imgurl, location }: Catch =
+      request.body;
 
     await client.query<Catch>(
-      "INSERT INTO catches (user_id, species, weight, length, c_r, imgurl) VALUES ($1, $2, $3, $4, $5, $6)",
-      [userId, species, weight, length, c_r, imgurl]
+      "INSERT INTO catches (user_id, species, weight, length, c_r, imgurl, location) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [userId, species, weight, length, c_r ? 1 : 0, imgurl, location]
     );
 
     response.status(201).send("Catch registred successfully");
@@ -374,7 +378,7 @@ app.get(
       }
 
       const { rows } = await client.query(
-        "SELECT id, user_id, species, weight, weight, length, c_r, imgurl, TO_CHAR(created, 'YYYY-MM-DD HH24:MI') AS catch_created FROM catches WHERE user_id = $1 ORDER BY id DESC",
+        "SELECT id, user_id, species, weight, weight, length, c_r, location, imgurl, TO_CHAR(created, 'YYYY-MM-DD HH24:MI') AS catch_created FROM catches WHERE user_id = $1 ORDER BY id DESC",
         [userId]
       );
       response.status(200).send(rows);
