@@ -235,7 +235,7 @@ app.put(
   auth,
   async (request: Request, response: Response) => {
     try {
-      const token: string = request.cookies.token;
+      const token = request.query.token;
       const userIdResult = await client.query<{ user_id: number }>(
         "SELECT * FROM tokens WHERE token = $1",
         [token]
@@ -252,7 +252,7 @@ app.put(
         "SELECT user_id FROM catches WHERE id = $1",
         [catchId]
       );
-      if (!catchResult || !catchResult.rows || catchResult.rows.length === 0) {
+      if (!catchResult || catchResult.rows.length === 0) {
         return response.status(404).send("Catch not found");
       }
       if (catchResult.rows[0].user_id !== userId) {
@@ -279,17 +279,20 @@ app.put(
         values.push(request.body.length);
         paramNumber++;
       }
-      if ("c_r" in request.body) {
-        updateFields.push(`c_r = $${paramNumber}`);
-        values.push(request.body.c_r);
-        paramNumber++;
-      }
       if ("imgurl" in request.body) {
         updateFields.push(`imgurl = $${paramNumber}`);
         values.push(request.body.imgurl);
         paramNumber++;
       }
+      if ("location" in request.body) {
+        updateFields.push(`location = $${paramNumber}`);
+        values.push(request.body.location);
+        paramNumber++;
+      }
 
+      if (updateFields.length === 0) {
+        return response.status(400).send("Nothing to update");
+      }
       await client.query(
         `UPDATE catches SET ${updateFields.join(
           ","

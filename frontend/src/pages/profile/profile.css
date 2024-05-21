@@ -68,16 +68,10 @@
 }
 
 hr {
-  grid-row: 6;
+  grid-row: 8;
   grid-column: 1 / span 4;
   width: 100%;
   color: rgba(85, 85, 85, 0.2);
-}
-
-.Latest {
-  grid-row: 8;
-  grid-column: 1 / span 4;
-  font-size: 14px;
 }
 
 .userCatches {
@@ -125,6 +119,44 @@ hr {
   &:active {
     transform: scale(1.05);
   }
+}
+
+.button-42 {
+  place-self: center;
+  background-color: initial;
+  background-image: linear-gradient(-180deg, #ffcc24, #ffa600);
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: Inter, -apple-system, system-ui, Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  height: 38px;
+  outline: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  text-align: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  white-space: nowrap;
+  width: fit-content;
+  font-size: 12px;
+  border: 0;
+  margin: 10px 0;
+}
+
+.button-42:hover {
+  background: #927c00b4;
+  &:active {
+    transform: scale(1.05);
+  }
+}
+
+.regCatch {
+  grid-row: 7;
+  grid-column: 4;
 }
 .catchItem {
   text-align: center;

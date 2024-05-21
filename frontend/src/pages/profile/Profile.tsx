@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFish } from "@fortawesome/free-solid-svg-icons";
 import RegisterCatch from "../../components/RegisterCatch";
+import EditCatch from "../../components/EditCatch";
 import "./profile.css";
 
 function Profile() {
@@ -76,15 +77,18 @@ function Profile() {
               <p className='userMail'>
                 Email: {user.email} <br />
               </p>
-              <p className='userPw'>Byt lösenord</p>
+              <p className='userPw'>-Byt lösenord-</p>
               <p className='userCreated'>
                 Medlem sedan: {user.account_created}
               </p>
+              <span className='regCatch'>
+                <RegisterCatch />
+              </span>
+
               <hr />
             </div>
 
             <div className='userCatches'>
-              <RegisterCatch />
               {catches && catches.length > 0 ? (
                 catches.map((fish) => (
                   <div key={fish.id} className='catchItem'>
@@ -128,6 +132,7 @@ function Profile() {
                         </tbody>
                       </table>
                     </div>
+                    <EditCatch props={fish.id} />
                   </div>
                 ))
               ) : (
