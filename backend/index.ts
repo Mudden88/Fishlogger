@@ -3,6 +3,7 @@ import express, { NextFunction } from "express";
 import { Client, QueryResult } from "pg";
 import * as dotenv from "dotenv";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
@@ -16,20 +17,24 @@ client.connect();
 
 const app = express();
 
-app.use(cors());
+const corsOption = {
+  origin: "http://localhost:5173",
+  credentials: true,
+};
+
+app.use(cors(corsOption));
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 //Middleware for authentication
 async function auth(request: Request, response: Response, next: NextFunction) {
-  const token = request.query.token;
   try {
+    const token = request.cookies.token;
     const findToken = await client.query(
-      "SELECT * FROM tokens WHERE token = $1",
+      "SELECT user_id FROM tokens WHERE token = $1",
       [token]
     );
-
     if (findToken.rows.length === 0) {
       return response.status(401).send("Unauthorized: please login");
     }
@@ -169,10 +174,29 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
       user.id,
       token,
     ]);
-    response.status(201).send({ token: token });
+    response.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+    });
+    response.status(201).send("Inloggning lyckad");
   } catch (error) {
     console.error("Login Error", error);
     response.status(500).send("Server error at login");
+  }
+});
+
+app.get("/get-cookie", async (request: Request, response: Response) => {
+  try {
+    const cookie: string | undefined = request.cookies.token;
+
+    if (cookie === undefined) {
+      return response.status(401).send("Unauthorized request");
+    }
+
+    response.status(200).send({ cookie });
+  } catch (error) {
+    console.error("Error getting cookie ", error);
+    response.status(500).send("Error while retreiving cookie from client");
   }
 });
 
@@ -181,6 +205,8 @@ app.delete("/logout", auth, async (request: Request, response: Response) => {
     const token = request.query.token;
 
     await client.query<Token>("DELETE FROM tokens WHERE token = $1", [token]);
+
+    response.cookie("token", "", { expires: new Date(0) });
     response.status(200).send("Logout successfull");
   } catch (error) {
     console.error("Error during logout: ", error);
@@ -230,82 +256,76 @@ app.post("/newCatch", auth, async (request: Request, response: Response) => {
   }
 });
 
-app.put(
-  "/updateCatch/:catchId",
-  auth,
-  async (request: Request, response: Response) => {
-    try {
-      const token = request.query.token;
-      const userIdResult = await client.query<{ user_id: number }>(
-        "SELECT * FROM tokens WHERE token = $1",
-        [token]
-      );
+app.put("/updateCatch/:catchId", auth, async (request, response) => {
+  try {
+    const token = request.query.token;
+    const userIdResult = await client.query<{ user_id: number }>(
+      "SELECT * FROM tokens WHERE token = $1",
+      [token]
+    );
 
-      if (!userIdResult || userIdResult.rows.length === 0) {
-        return response.status(401).send("Unauthorized");
-      }
-
-      const userId = userIdResult.rows[0].user_id;
-
-      const catchId: number = parseInt(request.params.catchId, 10);
-      const catchResult = await client.query(
-        "SELECT user_id FROM catches WHERE id = $1",
-        [catchId]
-      );
-      if (!catchResult || catchResult.rows.length === 0) {
-        return response.status(404).send("Catch not found");
-      }
-      if (catchResult.rows[0].user_id !== userId) {
-        return response.status(403).send("Permission to update catch, denied");
-      }
-
-      const updateFields: string[] = [];
-      const values: Catch[] = [];
-      let paramNumber: number = 1;
-
-      if ("species" in request.body) {
-        updateFields.push(`species = $${paramNumber}`);
-        values.push(request.body.species);
-        paramNumber++;
-      }
-
-      if ("weight" in request.body) {
-        updateFields.push(`weight = $${paramNumber}`);
-        values.push(request.body.weight);
-        paramNumber++;
-      }
-      if ("length" in request.body) {
-        updateFields.push(`length = $${paramNumber}`);
-        values.push(request.body.length);
-        paramNumber++;
-      }
-      if ("imgurl" in request.body) {
-        updateFields.push(`imgurl = $${paramNumber}`);
-        values.push(request.body.imgurl);
-        paramNumber++;
-      }
-      if ("location" in request.body) {
-        updateFields.push(`location = $${paramNumber}`);
-        values.push(request.body.location);
-        paramNumber++;
-      }
-
-      if (updateFields.length === 0) {
-        return response.status(400).send("Nothing to update");
-      }
-      await client.query(
-        `UPDATE catches SET ${updateFields.join(
-          ","
-        )} WHERE id = $${paramNumber}`,
-        [...values, catchId]
-      );
-      response.status(201).send("Catch updated successfully");
-    } catch (error) {
-      console.error("Error ", error);
-      response.status(500).send("Server error");
+    if (!userIdResult || userIdResult.rows.length === 0) {
+      return response.status(401).send("Unauthorized");
     }
+
+    const userId = userIdResult.rows[0].user_id;
+
+    const catchId: number = parseInt(request.params.catchId, 10);
+    const catchResult = await client.query(
+      "SELECT user_id FROM catches WHERE id = $1",
+      [catchId]
+    );
+    if (!catchResult || catchResult.rows.length === 0) {
+      return response.status(404).send("Catch not found");
+    }
+    if (catchResult.rows[0].user_id !== userId) {
+      return response.status(403).send("Permission to update catch, denied");
+    }
+
+    const updateFields: string[] = [];
+    const values: Catch[] = [];
+    let paramNumber: number = 1;
+
+    if ("species" in request.body) {
+      updateFields.push(`species = $${paramNumber}`);
+      values.push(request.body.species);
+      paramNumber++;
+    }
+
+    if ("weight" in request.body) {
+      updateFields.push(`weight = $${paramNumber}`);
+      values.push(request.body.weight);
+      paramNumber++;
+    }
+    if ("length" in request.body) {
+      updateFields.push(`length = $${paramNumber}`);
+      values.push(request.body.length);
+      paramNumber++;
+    }
+    if ("imgurl" in request.body) {
+      updateFields.push(`imgurl = $${paramNumber}`);
+      values.push(request.body.imgurl);
+      paramNumber++;
+    }
+    if ("location" in request.body) {
+      updateFields.push(`location = $${paramNumber}`);
+      values.push(request.body.location);
+      paramNumber++;
+    }
+
+    if (updateFields.length === 0) {
+      return response.status(400).send("Nothing to update");
+    }
+    await client.query(
+      `UPDATE catches SET ${updateFields.join(",")} WHERE id = $${paramNumber}`,
+      [...values, catchId]
+    );
+    response.status(201).send("Catch updated successfully");
+  } catch (error) {
+    console.error("Error ", error);
+    response.status(500).send("Server error");
   }
-);
+});
 
 app.get("/getUsers", async (request: Request, response: Response) => {
   const getUser = request.query.getUser;
@@ -377,7 +397,7 @@ app.get(
     try {
       const userId: number = parseInt(request.params.userId, 10);
       if (!userId) {
-        response.status(401).send("Unauthorized request");
+        return response.status(401).send("Unauthorized request");
       }
 
       const { rows } = await client.query(
@@ -387,6 +407,38 @@ app.get(
       response.status(200).send(rows);
     } catch (error) {
       console.error("Error", error);
+      response.status(500).send("Server error");
+    }
+  }
+);
+
+app.delete(
+  "/deleteCatch/:catchId",
+  auth,
+  async (request: Request, response: Response) => {
+    try {
+      const catchId: number = parseInt(request.params.catchId, 10);
+      const token = request.query.token;
+      const getToken = await client.query(
+        "SELECT * FROM tokens WHERE token =$1",
+        [token]
+      );
+      const validateToken = getToken.rows[0];
+
+      const userId: number = validateToken.user_id;
+
+      if (!catchId || !userId) {
+        return response.status(401).send("Unauthorized request");
+      }
+
+      if (catchId && userId) {
+        await client.query("DELETE FROM catches WHERE id = $1", [catchId]);
+        response.status(204).send("Catch deleted successfully");
+      } else {
+        response.send(404).send("Not found");
+      }
+    } catch (error) {
+      console.error("Error while deleting catch", error);
       response.status(500).send("Server error");
     }
   }
