@@ -47,7 +47,9 @@
   padding: 0;
   margin: 0;
 }
-
+.loadingUser {
+  color: black;
+}
 .userPw {
   grid-row: 4;
   grid-column: 1 / span 3;
@@ -154,6 +156,21 @@ hr {
   }
 }
 
+.button-43 {
+  margin-left: auto;
+  margin-right: 10px;
+  place-self: center;
+  color: black;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.button-43:hover {
+  &:active {
+    transform: scale(1.05);
+  }
+}
+
 .regCatch {
   grid-row: 7;
   grid-column: 4;
@@ -191,4 +208,17 @@ table {
 
 thead {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.fishNr {
+  width: fit-content;
+  margin: 0;
+  margin-right: auto;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+}
+
+.imports {
+  display: flex;
+  justify-content: center;
 }

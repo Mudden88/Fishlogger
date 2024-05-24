@@ -74,7 +74,7 @@ function CreateAccount() {
               Lösenord:
               <input type='password' name='password' />
             </label>
-            {error && <span className='errorMessage'>{error}</span>}
+            {error && <span className='errorMsg'>{error}</span>}
             <input className='submitBtn' type='submit' value='Skapa konto' />
             <input
               className='submitBtn'

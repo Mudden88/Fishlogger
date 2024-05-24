@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,17 +8,16 @@ import { faFish } from "@fortawesome/free-solid-svg-icons";
 import "../index.css";
 
 function Navbar() {
-  const token = localStorage.getItem("isLoggedIn");
-
+  const { token } = useContext(AuthContext);
   const handleLogout = async () => {
     try {
       await fetch(`http://localhost:3000/logout?token=${token}`, {
         method: "DELETE",
+        credentials: "include",
       }).then((response) => {
         if (response.status === 200) {
           toast.success("Du är nu utloggad");
-          localStorage.removeItem("isLoggedIn");
-
+          localStorage.clear();
           const path = window.location.pathname;
           window.location.replace(path);
         }

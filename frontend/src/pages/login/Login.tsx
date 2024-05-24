@@ -32,13 +32,11 @@ function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
+        credentials: "include",
       });
       if (response.status === 201) {
-        const getData = await response.json();
-        const token = getData;
-
         await setLoggedIn(true);
-        await localStorage.setItem("isLoggedIn", token.token);
+        await localStorage.setItem("isUser", "true");
         await navigate("/profile");
       } else if (response.status === 404) {
         setError("Kontrollera användarnamn och lösenord");

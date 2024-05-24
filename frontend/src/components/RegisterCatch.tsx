@@ -1,8 +1,12 @@
 import Modal from "react-modal";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 import "./RegisterCatch.css";
 
 const customStyles = {
+  overlay: {
+    background: "rgba(17, 15, 29, 0.7)",
+  },
   content: {
     top: "50%",
     left: "50%",
@@ -21,8 +25,7 @@ function RegisterCatch() {
 
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  const token = localStorage.getItem("isLoggedIn");
+  const { token } = useContext(AuthContext);
 
   function openModal() {
     setIsOpen(true);
@@ -65,11 +68,13 @@ function RegisterCatch() {
             imgurl,
             location,
           }),
+          credentials: "include",
         }
       );
 
       if (response.status === 201) {
-        closeModal();
+        window.location.reload();
+        await closeModal();
       } else if (response.status === 401) {
         setError("Kunde inte hitta användarID");
       } else {

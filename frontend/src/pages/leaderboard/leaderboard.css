@@ -12,13 +12,19 @@
   -webkit-backdrop-filter: blur(10.6px);
   border: 1px solid rgba(255, 255, 255, 0.185);
 }
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .leaderboard-results {
   text-align: left;
   border-collapse: collapse;
 }
 .leaderboard-results thead th {
   background: rgba(38, 0, 255, 0.5);
-  padding: 25px;
+  padding: 20px;
   font-size: 14px;
   font-weight: bold;
   color: white;
@@ -28,6 +34,8 @@
   padding: 10px 20px;
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   border-bottom-color: 1px solid rgba(255, 255, 255, 0.31);
 }
 
@@ -36,7 +44,7 @@
 }
 
 .leaderboard-results tbody tr:nth-child(1) {
-  background-color: rgba(0, 195, 255, 0.425);
+  background-color: rgba(115, 206, 241, 0.541);
 }
 
 .imgurl {
@@ -48,5 +56,42 @@ a {
   color: white;
   &:hover {
     color: rgba(0, 0, 0, 0.233);
+  }
+}
+
+@media screen and (max-width: 860px) {
+  .hide {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .leaderboard-results {
+    text-align: left;
+    border-collapse: collapse;
+  }
+  .leaderboard-results thead th {
+    background: rgba(38, 0, 255, 0.5);
+    padding: 10px;
+    font-size: 12px;
+    font-weight: initial;
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .leaderboard-results tbody td {
+    padding: 10px;
+    font-size: 10px;
+    font-weight: 400;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-bottom-color: 1px solid rgba(255, 255, 255, 0.31);
+  }
+}
+
+@media screen and (max-width: 440px) {
+  .tableWrap {
+    max-width: 340px;
+    width: 100%;
+    overflow-x: auto;
   }
 }
