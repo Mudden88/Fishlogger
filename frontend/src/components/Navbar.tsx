@@ -8,7 +8,7 @@ import { faFish } from "@fortawesome/free-solid-svg-icons";
 import "../index.css";
 
 function Navbar() {
-  const { token } = useContext(AuthContext);
+  const { token, loggedIn } = useContext(AuthContext);
   const handleLogout = async () => {
     try {
       await fetch(`http://localhost:3000/logout?token=${token}`, {
@@ -40,7 +40,7 @@ function Navbar() {
         <li>
           <Link to='/leaderboard'>Rankinglista</Link>
         </li>
-        {token ? (
+        {token && loggedIn ? (
           <li>
             <Link to='/profile'>Profil</Link>
           </li>

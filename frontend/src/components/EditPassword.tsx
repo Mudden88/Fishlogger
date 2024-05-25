@@ -1,7 +1,6 @@
 import Modal from "react-modal";
 import { useState, FormEvent, useContext } from "react";
 import { AuthContext } from "../context/AuthProvider";
-import "./RegisterCatch.css";
 
 const customStyles = {
   overlay: {
@@ -25,14 +24,11 @@ interface Props {
 }
 
 interface FormData {
-  species?: string;
-  weight?: number;
-  length?: number;
-  imgurl?: string;
-  location?: string;
+  oldPassword?: string;
+  newPassword?: string;
 }
 
-function EditCatch(data: Props) {
+function EditPassword(data: Props) {
   Modal.setAppElement("#root");
 
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
@@ -52,38 +48,31 @@ function EditCatch(data: Props) {
     e.preventDefault();
 
     const target = e.target as typeof e.target & {
-      species: { value: string };
-      weight: { value: number };
-      length: { value: number };
-      imgurl: { value: string };
-      location: { value: string };
+      oldPassword: { value: string };
+      newPassword: { value: string };
     };
     const formData: FormData = {
-      species: target.species.value,
-      weight: target.weight.value,
-      length: target.length.value,
-      imgurl: target.imgurl.value,
-      location: target.location.value,
+      oldPassword: target.oldPassword.value,
+      newPassword: target.newPassword.value,
     };
-
-    const filterData = Object.fromEntries(
-      Object.entries(formData).filter(([, value]) => value !== "")
-    ) as FormData;
 
     try {
       const response = await fetch(
-        `http://localhost:3000/updateCatch/${data.props}/?token=${token}`,
+        `http://localhost:3000/changePassword/${data.props}/?token=${token}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(filterData),
+          body: JSON.stringify(formData),
           credentials: "include",
         }
       );
 
       if (response.status === 201) {
-        await window.location.reload();
-        await closeModal();
+        setError("Lösenord Uppdaterat");
+        setTimeout(() => {
+          window.location.reload();
+          closeModal();
+        }, 1500);
       } else if (response.status === 401) {
         setError("Kunde inte hitta användarID");
       } else if (response.status === 400) {
@@ -98,43 +87,30 @@ function EditCatch(data: Props) {
   };
 
   return (
-    <div className='Modal'>
+    <div className='userPw'>
       <>
-        <span className='button-43' onClick={openModal}>
-          Redigera fångst
-        </span>
+        <p className='userPw' onClick={openModal}>
+          -Byt Lösenord-
+        </p>
       </>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        contentLabel='Register new catch'
+        contentLabel='Edit password'
         style={customStyles}>
-        <h2>Redigera fångst</h2>
+        <h2>Ändra lösenord</h2>
         <p className='closeModal' onClick={closeModal}>
           x
         </p>
-        <p>Fyll endast i de fält du vill uppdatera</p>
         {error && <p className='errormsg'>{error}</p>}
         <form className='regForm' onSubmit={submitHandler}>
           <label>
-            Art:
-            <input type='text' name='species' />
+            Nuvarande lösenord:
+            <input type='password' name='oldPassword' />
           </label>
           <label>
-            Vikt i gram:
-            <input type='number' name='weight' />
-          </label>
-          <label>
-            Längd i cm:
-            <input type='number' name='length' />
-          </label>
-          <label>
-            Bild:
-            <input type='text' name='imgurl' />
-          </label>
-          <label>
-            Plats:
-            <input type='text' name='location' />
+            Nytt lösenord: <br />
+            <input type='password' name='newPassword' />
           </label>
           <input className='button-41' type='submit' value='Skicka' />
         </form>
@@ -143,4 +119,4 @@ function EditCatch(data: Props) {
   );
 }
 
-export default EditCatch;
+export default EditPassword;

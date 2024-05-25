@@ -33,7 +33,7 @@ const AuthProvider = ({ children }: Props) => {
   const isUser = localStorage.getItem("isUser");
   useEffect(() => {
     if (isUser) {
-      fetch("http://localhost:3000/get-cookie", {
+      fetch("http://localhost:3000/get-cookie?token={token}", {
         credentials: "include",
       })
         .then((response) => response.json())
@@ -41,12 +41,14 @@ const AuthProvider = ({ children }: Props) => {
           if (result.cookie) {
             setLoggedIn(true);
             setToken(result.cookie);
-          } else {
-            console.log("Nope");
           }
+        })
+        .catch((error) => {
+          console.error(error);
         });
     }
   }, [isUser]);
+
   return (
     <AuthContext.Provider value={{ loggedIn, setLoggedIn, token, setToken }}>
       {children}

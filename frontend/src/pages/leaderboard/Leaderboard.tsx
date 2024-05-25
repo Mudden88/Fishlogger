@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import RegisterCatch from "../../components/RegisterCatch";
-import Cookies from "js-cookie";
 import "./leaderboard.css";
 
 interface LeaderboardRes {
@@ -21,7 +20,7 @@ function Leaderboard() {
   const [catches, setCatches] = useState<LeaderboardRes[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const apiUrl: string = "http://localhost:3000/leaderboard";
-  const isLoggedIn = Cookies.get("token");
+  const isLoggedIn = localStorage.getItem("isUser");
 
   useEffect(() => {
     try {

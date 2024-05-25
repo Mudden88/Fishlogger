@@ -7,11 +7,17 @@
 .regForm {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  justify-content: flex-start;
 }
+
 .regForm label input {
   background-color: white;
   color: black;
   font-weight: 700;
   padding: 5px;
+  width: max-content;
+}
+
+.checkBox {
+  width: 30px;
 }

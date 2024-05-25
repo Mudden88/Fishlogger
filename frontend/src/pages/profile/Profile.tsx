@@ -5,6 +5,7 @@ import { AuthContext } from "../../context/AuthProvider";
 import RegisterCatch from "../../components/RegisterCatch";
 import EditCatch from "../../components/EditCatch";
 import DeleteCatch from "../../components/DeleteCatch";
+import EditPassword from "../../components/EditPassword";
 import "./profile.css";
 
 function Profile() {
@@ -85,14 +86,13 @@ function Profile() {
               <p className='userMail'>
                 Email: {user.email} <br />
               </p>
-              <p className='userPw'>-Byt lösenord-</p>
+              <EditPassword props={user.user_id} />
               <p className='userCreated'>
                 Medlem sedan: {user.account_created}
               </p>
               <span className='regCatch'>
                 <RegisterCatch />
               </span>
-
               <hr />
             </div>
 

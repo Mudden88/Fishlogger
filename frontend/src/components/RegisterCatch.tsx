@@ -122,10 +122,10 @@ function RegisterCatch() {
           </label>
           <label>
             C&R:
-            <input type='checkbox' name='c_r' />
+            <input className='checkBox' type='checkbox' name='c_r' />
           </label>
           <label>
-            Bild:
+            Länk till bild:
             <input type='text' name='imgurl' />
           </label>
           <label>
