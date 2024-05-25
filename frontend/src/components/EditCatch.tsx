@@ -20,11 +20,24 @@ const customStyles = {
   },
 };
 
-function RegisterCatch() {
+interface Props {
+  props: number;
+}
+
+interface FormData {
+  species?: string;
+  weight?: number;
+  length?: number;
+  imgurl?: string;
+  location?: string;
+}
+
+function EditCatch(data: Props) {
   Modal.setAppElement("#root");
 
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
   const { token } = useContext(AuthContext);
 
   function openModal() {
@@ -42,41 +55,39 @@ function RegisterCatch() {
       species: { value: string };
       weight: { value: number };
       length: { value: number };
-      c_r: { checked: boolean };
       imgurl: { value: string };
       location: { value: string };
     };
+    const formData: FormData = {
+      species: target.species.value,
+      weight: target.weight.value,
+      length: target.length.value,
+      imgurl: target.imgurl.value,
+      location: target.location.value,
+    };
 
-    const species = target.species.value;
-    const weight = target.weight.value;
-    const length = target.length.value;
-    const c_r = target.c_r.checked;
-    const imgurl = target.imgurl.value;
-    const location = target.location.value;
+    const filterData = Object.fromEntries(
+      Object.entries(formData).filter(([, value]) => value !== "")
+    ) as FormData;
 
     try {
       const response = await fetch(
-        `http://localhost:3000/newCatch?token=${token}`,
+        `http://localhost:3000/updateCatch/${data.props}/?token=${token}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            species,
-            weight,
-            length,
-            c_r,
-            imgurl,
-            location,
-          }),
+          body: JSON.stringify(filterData),
           credentials: "include",
         }
       );
 
       if (response.status === 201) {
-        window.location.reload();
+        await window.location.reload();
         await closeModal();
       } else if (response.status === 401) {
         setError("Kunde inte hitta användarID");
+      } else if (response.status === 400) {
+        setError("Vänligen fyll i de fält du vill uppdatera");
       } else {
         setError("Något gick fel, försök igen.");
       }
@@ -88,26 +99,23 @@ function RegisterCatch() {
 
   return (
     <div className='Modal'>
-      <input
-        className='button-41'
-        type='button'
-        value='Lägg till fångst'
-        onClick={openModal}
-      />
+      <>
+        <span className='button-43' onClick={openModal}>
+          Redigera fångst
+        </span>
+      </>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
         contentLabel='Register new catch'
         style={customStyles}>
-        <h2>Lägg till fångst</h2>
+        <h2>Redigera fångst</h2>
         <p className='closeModal' onClick={closeModal}>
           x
         </p>
-        {error && <p className='error'>{error}</p>}
-        <form
-          className='regForm'
-          onSubmit={submitHandler}
-          encType='multipart/form-data'>
+        <p>Fyll endast i de fält du vill uppdatera</p>
+        {error && <p className='errormsg'>{error}</p>}
+        <form className='regForm' onSubmit={submitHandler}>
           <label>
             Art:
             <input type='text' name='species' />
@@ -121,11 +129,7 @@ function RegisterCatch() {
             <input type='number' name='length' />
           </label>
           <label>
-            C&R:
-            <input className='checkBox' type='checkbox' name='c_r' />
-          </label>
-          <label>
-            Länk till bild:
+            Bild:
             <input type='text' name='imgurl' />
           </label>
           <label>
@@ -139,4 +143,4 @@ function RegisterCatch() {
   );
 }
 
-export default RegisterCatch;
+export default EditCatch;

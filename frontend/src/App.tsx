@@ -13,6 +13,7 @@ import Leaderboard from "./pages/leaderboard/Leaderboard";
 import Login from "./pages/login/Login";
 import CreateAccount from "./pages/createaccount/CreateAccount";
 import Profile from "./pages/profile/Profile";
+import Contact from "./components/Contact";
 import "./App.css";
 
 function Root() {
@@ -23,6 +24,7 @@ function Root() {
       <main>
         <Outlet />
       </main>
+      <Contact />
     </>
   );
 }

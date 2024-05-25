@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFish } from "@fortawesome/free-solid-svg-icons";
+import { AuthContext } from "../../context/AuthProvider";
 import RegisterCatch from "../../components/RegisterCatch";
+import EditCatch from "../../components/EditCatch";
+import DeleteCatch from "../../components/DeleteCatch";
+import EditPassword from "../../components/EditPassword";
 import "./profile.css";
 
 function Profile() {
-  const token = localStorage.getItem("isLoggedIn");
-
   const [user, setUser] = useState<userProfile | null>(null);
   const [catches, setCatches] = useState<UserCatch[] | null>(null);
+  const { token } = useContext(AuthContext);
 
   interface userProfile {
     id: number;
@@ -34,7 +37,9 @@ function Profile() {
 
   useEffect(() => {
     if (token) {
-      fetch(`http://localhost:3000/userProfile?token=${token}`)
+      fetch(`http://localhost:3000/userProfile?token=${token}`, {
+        credentials: "include",
+      })
         .then((response) => response.json())
         .then((result) => {
           setUser(result[0]);
@@ -48,7 +53,12 @@ function Profile() {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:3000/userCatches/${user.user_id}?token=${token}`)
+      fetch(
+        `http://localhost:3000/userCatches/${user.user_id}?token=${token}`,
+        {
+          credentials: "include",
+        }
+      )
         .then((response) => response.json())
         .then((result) => {
           setCatches(result);
@@ -76,19 +86,23 @@ function Profile() {
               <p className='userMail'>
                 Email: {user.email} <br />
               </p>
-              <p className='userPw'>Byt lösenord</p>
+              <EditPassword props={user.user_id} />
               <p className='userCreated'>
                 Medlem sedan: {user.account_created}
               </p>
+              <span className='regCatch'>
+                <RegisterCatch />
+              </span>
               <hr />
             </div>
 
             <div className='userCatches'>
-              <RegisterCatch />
               {catches && catches.length > 0 ? (
-                catches.map((fish) => (
+                catches.map((fish, index) => (
                   <div key={fish.id} className='catchItem'>
+                    <p className='fishNr'>#{index + 1} </p>
                     <p className='created'>{fish.catch_created}</p>
+
                     {fish.imgurl ? (
                       <a href={fish.imgurl} target='_blanc'>
                         <img
@@ -128,11 +142,16 @@ function Profile() {
                         </tbody>
                       </table>
                     </div>
+                    <div className='imports'>
+                      <EditCatch props={fish.id} />
+                      <DeleteCatch props={fish.id} />
+                    </div>
+                    <hr />
                   </div>
                 ))
               ) : (
                 <p className='noFish'>
-                  Du har inte laddat upp något ännu, tryck på knappen nedan för
+                  Du har inte laddat upp något ännu, tryck på knappen ovan för
                   att börja logga dina fiskar!
                 </p>
               )}

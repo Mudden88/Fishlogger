@@ -3,15 +3,12 @@
   color: rgb(255, 255, 255);
   box-sizing: border-box;
 }
-html {
-  min-height: 100dvh;
-}
+
 html body {
+  background: fixed;
   background-image: url(../robson-hatsukami-morgan-qr7tsSwDOg0-unsplash.jpg);
   background-size: cover;
-  background-position: unset;
-  background-repeat: no-repeat;
-  margin: 0;
+  background-position: top;
 }
 
 #root {
@@ -57,4 +54,11 @@ p {
 
 .paragraph {
   margin: 0 20px 0 20px;
+}
+
+.contactField {
+  height: 20px;
+  padding: 10px;
+  font-size: 12px;
+  color: rgb(228, 228, 228);
 }
