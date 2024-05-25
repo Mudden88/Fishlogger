@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
 
-//Middleware for authentication
+//Middleware for authentication..
 async function auth(request: Request, response: Response, next: NextFunction) {
   try {
     const token = request.cookies.token;
