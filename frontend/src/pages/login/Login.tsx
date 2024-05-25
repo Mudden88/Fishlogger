@@ -28,7 +28,7 @@ function Login() {
     const password = target.password.value;
 
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -58,7 +58,7 @@ function Login() {
         <div className='form'>
           <form
             className='form-fields'
-            action='http://localhost:3000/login'
+            action='/login'
             method='post'
             onSubmit={submitHandler}>
             <div className='formwrapper'>

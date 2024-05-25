@@ -72,7 +72,7 @@ function EditCatch(data: Props) {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/updateCatch/${data.props}/?token=${token}`,
+        `/api/updateCatch/${data.props}/?token=${token}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

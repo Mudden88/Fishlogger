@@ -9,19 +9,22 @@ import "../index.css";
 
 function Navbar() {
   const { token, loggedIn } = useContext(AuthContext);
+
   const handleLogout = async () => {
     try {
-      await fetch(`http://localhost:3000/logout?token=${token}`, {
+      await fetch(`/api/logout?token=${token}`, {
         method: "DELETE",
         credentials: "include",
-      }).then((response) => {
-        if (response.status === 200) {
-          toast.success("Du är nu utloggad");
-          localStorage.clear();
-          const path = window.location.pathname;
-          window.location.replace(path);
-        }
-      });
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            toast.success("Du är nu utloggad");
+            localStorage.clear();
+          }
+        })
+        .then(() => {
+          window.location.reload();
+        });
     } catch (error) {
       console.error("Error while logout ", error);
     }
@@ -38,15 +41,15 @@ function Navbar() {
           <Link to='/'>Start</Link>
         </li>
         <li>
-          <Link to='/leaderboard'>Rankinglista</Link>
+          <Link to='/Leaderboard'>Rankinglista</Link>
         </li>
         {token && loggedIn ? (
           <li>
-            <Link to='/profile'>Profil</Link>
+            <Link to='/Profile'>Profil</Link>
           </li>
         ) : (
           <li>
-            <Link to='/login'>Logga in / Skapa konto</Link>
+            <Link to='/Login'>Logga in / Skapa konto</Link>
           </li>
         )}
 

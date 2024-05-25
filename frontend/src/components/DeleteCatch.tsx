@@ -13,7 +13,7 @@ function DeleteCatch(data: Props) {
     try {
       if (data.props && token) {
         const response = await fetch(
-          `http://localhost:3000/deleteCatch/${data.props}?token=${token}`,
+          `/api/deleteCatch/${data.props}?token=${token}`,
           {
             method: "DELETE",
             credentials: "include",

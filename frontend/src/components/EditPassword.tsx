@@ -58,7 +58,7 @@ function EditPassword(data: Props) {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/changePassword/${data.props}/?token=${token}`,
+        `/api/changePassword/${data.props}/?token=${token}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -70,7 +70,6 @@ function EditPassword(data: Props) {
       if (response.status === 201) {
         setError("Lösenord Uppdaterat");
         setTimeout(() => {
-          window.location.reload();
           closeModal();
         }, 1500);
       } else if (response.status === 401) {
