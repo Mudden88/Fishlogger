@@ -10,7 +10,7 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 4000;
 const client = new Client({
   connectionString: process.env.PGURI,
 });
