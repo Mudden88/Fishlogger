@@ -188,11 +188,15 @@ app.post("/login", async (request: Request<LoginReq>, response: Response) => {
 app.get("/get-cookie", async (request: Request, response: Response) => {
   try {
     const cookie: string | undefined = request.cookies.token;
+    const token = request.query.token;
 
-    if (cookie === undefined) {
+    if (!cookie) {
       return response.status(401).send("Unauthorized request");
     }
-
+    if (token && !cookie) {
+      await client.query("DELETE FROM tokens WHERE token = $1", [token]);
+      return;
+    }
     response.status(200).send({ cookie });
   } catch (error) {
     console.error("Error getting cookie ", error);
@@ -439,6 +443,54 @@ app.delete(
       }
     } catch (error) {
       console.error("Error while deleting catch", error);
+      response.status(500).send("Server error");
+    }
+  }
+);
+
+app.put(
+  "/changePassword/:userID",
+  auth,
+  async (request: Request, response: Response) => {
+    try {
+      const userID = request.params.userID;
+      const token = request.cookies.token;
+
+      const { oldPassword, newPassword } = request.body;
+
+      if (!userID || !token) {
+        response.status(401).send("Unauthorized request");
+        return;
+      }
+
+      const result: QueryResult<User> = await client.query<User>(
+        "SELECT * FROM accounts WHERE id = $1",
+        [userID]
+      );
+      const user: User = result.rows[0];
+
+      if (!user) {
+        return response.status(404).send("User not found");
+      }
+      const checkPassword: boolean = await bcrypt.compare(
+        oldPassword,
+        user.password
+      );
+
+      if (!checkPassword) {
+        return response.status(401).send("Invalid password");
+      }
+
+      const hashedPassword: string = await bcrypt.hash(newPassword, 10);
+
+      await client.query("UPDATE accounts SET password = $1 WHERE id = $2", [
+        hashedPassword,
+        userID,
+      ]);
+
+      response.status(201).send("Password updated successfully");
+    } catch (error) {
+      console.error(error);
       response.status(500).send("Server error");
     }
   }
