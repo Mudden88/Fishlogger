@@ -55,25 +55,21 @@ function RegisterCatch() {
     const location = target.location.value;
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/newCatch?token=${token}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            species,
-            weight,
-            length,
-            c_r,
-            imgurl,
-            location,
-          }),
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`/api/newCatch?token=${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          species,
+          weight,
+          length,
+          c_r,
+          imgurl,
+          location,
+        }),
+        credentials: "include",
+      });
 
       if (response.status === 201) {
-        window.location.reload();
         await closeModal();
       } else if (response.status === 401) {
         setError("Kunde inte hitta användarID");

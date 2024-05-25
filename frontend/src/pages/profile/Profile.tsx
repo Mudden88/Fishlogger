@@ -37,7 +37,7 @@ function Profile() {
 
   useEffect(() => {
     if (token) {
-      fetch(`http://localhost:3000/userProfile?token=${token}`, {
+      fetch(`/api/userProfile?token=${token}`, {
         credentials: "include",
       })
         .then((response) => response.json())
@@ -53,12 +53,9 @@ function Profile() {
 
   useEffect(() => {
     if (user) {
-      fetch(
-        `http://localhost:3000/userCatches/${user.user_id}?token=${token}`,
-        {
-          credentials: "include",
-        }
-      )
+      fetch(`/api/userCatches/${user.user_id}?token=${token}`, {
+        credentials: "include",
+      })
         .then((response) => response.json())
         .then((result) => {
           setCatches(result);

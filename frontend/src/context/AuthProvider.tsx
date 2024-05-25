@@ -33,7 +33,7 @@ const AuthProvider = ({ children }: Props) => {
   const isUser = localStorage.getItem("isUser");
   useEffect(() => {
     if (isUser) {
-      fetch("http://localhost:3000/get-cookie?token={token}", {
+      fetch("/api/get-cookie?token={token}", {
         credentials: "include",
       })
         .then((response) => response.json())

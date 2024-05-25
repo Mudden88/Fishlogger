@@ -19,7 +19,7 @@ interface LeaderboardRes {
 function Leaderboard() {
   const [catches, setCatches] = useState<LeaderboardRes[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const apiUrl: string = "http://localhost:3000/leaderboard";
+  const apiUrl: string = "/api/leaderboard";
   const isLoggedIn = localStorage.getItem("isUser");
 
   useEffect(() => {

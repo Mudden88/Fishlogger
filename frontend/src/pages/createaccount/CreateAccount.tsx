@@ -34,7 +34,7 @@ function CreateAccount() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/create-account", {
+      const response = await fetch("/api/create-account", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -58,7 +58,7 @@ function CreateAccount() {
     <>
       <div className='container'>
         <form
-          action='http://localhost:8080/createaccount'
+          action='/api/createaccount'
           method='post'
           onSubmit={submitHandler}>
           <div className='formwrapper'>
