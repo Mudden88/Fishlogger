@@ -136,18 +136,6 @@ app.post(
     try {
       const { username, password }: User = request.body;
 
-      const existingUser: QueryResult<Token> = await client.query<Token>(
-        "SELECT * FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1)",
-        [username]
-      );
-      if (existingUser.rows.length > 0) {
-        await client.query(
-          "DELETE FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1",
-          [username]
-        );
-        response.status(409).send("Try again");
-      }
-
       const result: QueryResult<User> = await client.query<User>(
         "SELECT * FROM accounts WHERE username = $1",
         [username]
@@ -212,7 +200,14 @@ app.delete(
     try {
       const token = request.query.token;
 
-      await client.query<Token>("DELETE FROM tokens WHERE token = $1", [token]);
+      const userId = await client.query<Token>(
+        "SELECT user_id FROM tokens WHERE token = $1",
+        [token]
+      );
+
+      await client.query<Token>("DELETE FROM tokens WHERE user_id = $1", [
+        userId,
+      ]);
 
       response.cookie("token", "", { expires: new Date(0) });
       response.status(200).send("Logout successfull");
