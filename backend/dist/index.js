@@ -119,6 +119,7 @@ app.post("/api/login", (request, response) => __awaiter(void 0, void 0, void 0, 
         response.cookie("token", token, {
             httpOnly: true,
             secure: true,
+            maxAge: 2592000,
         });
         response.status(201).send("Inloggning lyckad");
     }
@@ -131,12 +132,12 @@ app.get("/api/get-cookie", (request, response) => __awaiter(void 0, void 0, void
     try {
         const cookie = request.cookies.token;
         const token = request.query.token;
-        if (!cookie) {
-            return response.status(401).send("Unauthorized request");
-        }
         if (token && !cookie) {
             yield client.query("DELETE FROM tokens WHERE token = $1", [token]);
-            return;
+            return response.status(400).send("Token removed, cookie missing");
+        }
+        if (!cookie) {
+            return response.status(401).send("Unauthorized request");
         }
         response.status(200).send({ cookie });
     }

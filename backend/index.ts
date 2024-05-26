@@ -171,6 +171,7 @@ app.post(
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
+        maxAge: 2592000,
       });
       response.status(201).send("Inloggning lyckad");
     } catch (error) {
@@ -185,13 +186,14 @@ app.get("/api/get-cookie", async (request: Request, response: Response) => {
     const cookie: string | undefined = request.cookies.token;
     const token = request.query.token;
 
+    if (token && !cookie) {
+      await client.query("DELETE FROM tokens WHERE token = $1", [token]);
+      return response.status(400).send("Token removed, cookie missing");
+    }
     if (!cookie) {
       return response.status(401).send("Unauthorized request");
     }
-    if (token && !cookie) {
-      await client.query("DELETE FROM tokens WHERE token = $1", [token]);
-      return;
-    }
+
     response.status(200).send({ cookie });
   } catch (error) {
     console.error("Error getting cookie ", error);
