@@ -141,7 +141,11 @@ app.post(
         [username]
       );
       if (existingUser.rows.length > 0) {
-        return response.status(400).send("User is already logged in");
+        await client.query(
+          "DELETE FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1",
+          [username]
+        );
+        return response.status(409).send("Try again");
       }
 
       const result: QueryResult<User> = await client.query<User>(
@@ -173,7 +177,7 @@ app.post(
         secure: true,
         maxAge: 2592000,
       });
-      response.status(201).send("Inloggning lyckad");
+      response.status(201).send("Login successfull");
     } catch (error) {
       console.error("Login Error", error);
       response.status(500).send("Server error at login");

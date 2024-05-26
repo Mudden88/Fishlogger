@@ -36,14 +36,15 @@ function Login() {
       });
       if (response.status === 201) {
         await setLoggedIn(true);
-        await localStorage.setItem("isUser", "true");
-        await navigate("/profile");
+        await navigate("/Profile");
       } else if (response.status === 404) {
         setError("Kontrollera användarnamn och lösenord");
       } else if (response.status === 401) {
         setError("Fel lösenord");
-      } else if (response.status === 400) {
-        setError("Användare redan inloggad");
+      } else if (response.status === 409) {
+        setError(
+          "Du är redan inloggad, systemet loggar ut dig automagiskt nu. Försök igen.."
+        );
       } else {
         setError("Fel vid inloggning");
       }

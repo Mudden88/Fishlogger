@@ -19,10 +19,10 @@ type IAuthContext = {
 };
 
 const initialValue: IAuthContext = {
-  loggedIn: !!localStorage.getItem("isUser"),
-  setLoggedIn: () => {},
   token: null,
   setToken: () => {},
+  loggedIn: false,
+  setLoggedIn: () => {},
 };
 
 const AuthContext = createContext<IAuthContext>(initialValue);
@@ -30,12 +30,10 @@ const AuthContext = createContext<IAuthContext>(initialValue);
 const AuthProvider = ({ children }: Props) => {
   const [loggedIn, setLoggedIn] = useState(initialValue.loggedIn);
   const [token, setToken] = useState(initialValue.token);
-  const isUser = localStorage.getItem("isUser");
+
   useEffect(() => {
-    if (!loggedIn) {
-      localStorage.removeItem("isUser");
-    } else if (isUser) {
-      fetch("/api/get-cookie?token={token}", {
+    if (loggedIn) {
+      fetch(`/api/get-cookie?token=${token}`, {
         credentials: "include",
       })
         .then((response) => response.json())
@@ -49,7 +47,7 @@ const AuthProvider = ({ children }: Props) => {
           console.error(error);
         });
     }
-  }, [isUser, loggedIn]);
+  }, [loggedIn, token]);
 
   return (
     <AuthContext.Provider value={{ loggedIn, setLoggedIn, token, setToken }}>
