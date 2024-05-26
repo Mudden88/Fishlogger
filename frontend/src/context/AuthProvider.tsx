@@ -32,7 +32,9 @@ const AuthProvider = ({ children }: Props) => {
   const [token, setToken] = useState(initialValue.token);
   const isUser = localStorage.getItem("isUser");
   useEffect(() => {
-    if (isUser) {
+    if (!loggedIn) {
+      localStorage.removeItem("isUser");
+    } else if (isUser) {
       fetch("/api/get-cookie?token={token}", {
         credentials: "include",
       })
@@ -47,7 +49,7 @@ const AuthProvider = ({ children }: Props) => {
           console.error(error);
         });
     }
-  }, [isUser]);
+  }, [isUser, loggedIn]);
 
   return (
     <AuthContext.Provider value={{ loggedIn, setLoggedIn, token, setToken }}>
