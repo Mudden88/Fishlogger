@@ -145,7 +145,7 @@ app.post(
           "DELETE FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1",
           [username]
         );
-        return response.status(409).send("Try again");
+        response.status(409).send("Try again");
       }
 
       const result: QueryResult<User> = await client.query<User>(
