@@ -41,7 +41,7 @@ function Login() {
         setError("Kontrollera användarnamn och lösenord");
       } else if (response.status === 401) {
         setError("Fel lösenord");
-      } else if (response.status === 409) {
+      } else if (response.status === 400) {
         setError(
           "Du är redan inloggad, systemet loggar ut dig automagiskt nu. Försök igen.."
         );

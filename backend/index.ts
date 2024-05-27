@@ -19,7 +19,6 @@ client.connect();
 const app = express();
 
 const corsOption = {
-  origin: `http://localhost:${PORT}`,
   credentials: true,
 };
 
