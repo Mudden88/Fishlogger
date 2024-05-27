@@ -81,3 +81,9 @@ label input {
   padding: 10px;
   border-radius: 10px;
 }
+
+@media screen and (max-width: 360px) {
+  label {
+    font-size: 12px;
+  }
+}

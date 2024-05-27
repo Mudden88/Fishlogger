@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 import RegisterCatch from "../components/RegisterCatch";
 
 function Home() {
   const [usersOnline, setUserOnline] = useState<number>(0);
   const apiUrl: string = "/api/getUsers?getUser=mudden";
-  const token = localStorage.getItem("isUser");
+  const { loggedIn } = useContext(AuthContext);
 
   useEffect(() => {
     try {
@@ -42,7 +43,7 @@ function Home() {
           längd för att se vem som för närvarande toppar. Stig i rank genom att
           logga fler fångster och visa upp din imponerande fångststatistik!
         </p>
-        {token && <RegisterCatch />}
+        {loggedIn && <RegisterCatch />}
       </div>
     </>
   );

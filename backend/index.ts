@@ -166,26 +166,20 @@ app.post(
         await client.query("DELETE FROM tokens WHERE token = $1", [
           existingToken,
         ]);
-        console.log(`Deleted existing token for user ${user.id}`);
       }
 
       const token: string = uuidv4();
-      console.log(`Generated new token for user ${user.id}`);
-
       await client.query(
         "INSERT INTO tokens (user_id, token) VALUES ($1, $2)",
         [user.id, token]
       );
-      console.log(`Inserted new token for user ${user.id}`);
 
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
-        maxAge: 2592000, // Cookie giltig i 30 dagar
+        maxAge: 2592000,
       });
-      console.log(`Set cookie for user ${user.id}`);
 
-      // Skicka status 201 för lyckad inloggning
       response.status(201).send("Login successful");
     } catch (error) {
       console.error("Login Error", error);

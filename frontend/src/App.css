@@ -5,7 +5,7 @@
 }
 
 html body {
-  background: fixed;
+  background-color: rgba(53, 53, 53, 0.767);
   background-image: url(../robson-hatsukami-morgan-qr7tsSwDOg0-unsplash.jpg);
   background-size: cover;
   background-position: top;

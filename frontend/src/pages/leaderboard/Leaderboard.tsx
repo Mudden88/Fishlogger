@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../../context/AuthProvider";
 import RegisterCatch from "../../components/RegisterCatch";
 import "./leaderboard.css";
 
@@ -19,8 +20,8 @@ interface LeaderboardRes {
 function Leaderboard() {
   const [catches, setCatches] = useState<LeaderboardRes[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const { loggedIn } = useContext(AuthContext);
   const apiUrl: string = "/api/leaderboard";
-  const isLoggedIn = localStorage.getItem("isUser");
 
   useEffect(() => {
     try {
@@ -39,7 +40,7 @@ function Leaderboard() {
     <>
       <div className='Lcontainer'>
         <h1>LEADERBOARD</h1>
-        {isLoggedIn && <RegisterCatch />}
+        {loggedIn && <RegisterCatch />}
         <p>Topp 100</p>
 
         {loading ? (

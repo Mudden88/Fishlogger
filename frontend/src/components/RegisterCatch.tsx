@@ -25,7 +25,7 @@ function RegisterCatch() {
 
   const [modalIsOpen, setIsOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useContext(AuthContext);
+  const { token, loggedIn } = useContext(AuthContext);
 
   function openModal() {
     setIsOpen(true);
@@ -100,36 +100,40 @@ function RegisterCatch() {
           x
         </p>
         {error && <p className='error'>{error}</p>}
-        <form
-          className='regForm'
-          onSubmit={submitHandler}
-          encType='multipart/form-data'>
-          <label>
-            Art:
-            <input type='text' name='species' />
-          </label>
-          <label>
-            Vikt i gram:
-            <input type='number' name='weight' />
-          </label>
-          <label>
-            Längd i cm:
-            <input type='number' name='length' />
-          </label>
-          <label>
-            C&R:
-            <input className='checkBox' type='checkbox' name='c_r' />
-          </label>
-          <label>
-            Länk till bild:
-            <input type='text' name='imgurl' />
-          </label>
-          <label>
-            Plats:
-            <input type='text' name='location' />
-          </label>
-          <input className='button-41' type='submit' value='Skicka' />
-        </form>
+        {loggedIn ? (
+          <form
+            className='regForm'
+            onSubmit={submitHandler}
+            encType='multipart/form-data'>
+            <label>
+              Art:
+              <input type='text' name='species' />
+            </label>
+            <label>
+              Vikt i gram:
+              <input type='number' name='weight' />
+            </label>
+            <label>
+              Längd i cm:
+              <input type='number' name='length' />
+            </label>
+            <label>
+              C&R:
+              <input className='checkBox' type='checkbox' name='c_r' />
+            </label>
+            <label>
+              Länk till bild:
+              <input type='text' name='imgurl' />
+            </label>
+            <label>
+              Plats:
+              <input type='text' name='location' />
+            </label>
+            <input className='button-41' type='submit' value='Skicka' />
+          </form>
+        ) : (
+          <p>Du behöver vara inloggad för att komma åt detta</p>
+        )}
       </Modal>
     </div>
   );
