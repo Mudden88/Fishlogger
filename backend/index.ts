@@ -135,6 +135,7 @@ app.post(
   async (request: Request<LoginReq>, response: Response) => {
     try {
       const { username, password } = request.body;
+      console.log(`Attempting to log in user: ${username}`);
 
       // Kontrollera om användarnamnet finns i accounts-tabellen
       const result: QueryResult<User> = await client.query<User>(
@@ -149,6 +150,7 @@ app.post(
       }
 
       const user: User = result.rows[0];
+      console.log(`Found user: ${user.username}`);
 
       // Jämför lösenordet
       const checkPassword: boolean = await bcrypt.compare(
@@ -174,16 +176,19 @@ app.post(
         await client.query("DELETE FROM tokens WHERE token = $1", [
           existingToken,
         ]);
+        console.log(`Deleted existing token for user ${user.id}`);
       }
 
       // Generera en ny token
       const token: string = uuidv4();
+      console.log(`Generated new token for user ${user.id}`);
 
       // Lägg till den nya token i databasen
       await client.query(
         "INSERT INTO tokens (user_id, token) VALUES ($1, $2)",
         [user.id, token]
       );
+      console.log(`Inserted new token for user ${user.id}`);
 
       // Skicka tillbaka den nya token som en cookie
       response.cookie("token", token, {
@@ -191,6 +196,7 @@ app.post(
         secure: true,
         maxAge: 2592000, // Cookie giltig i 30 dagar
       });
+      console.log(`Set cookie for user ${user.id}`);
 
       // Skicka status 201 för lyckad inloggning
       response.status(201).send("Login successful");
