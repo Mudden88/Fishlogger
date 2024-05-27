@@ -19,6 +19,7 @@ client.connect();
 const app = express();
 
 const corsOption = {
+  origin: "https://fishlogger.onrender.com",
   credentials: true,
 };
 
@@ -133,50 +134,66 @@ app.post(
   "/api/login",
   async (request: Request<LoginReq>, response: Response) => {
     try {
-      const { username, password }: User = request.body;
+      const { username, password } = request.body;
 
-      const existingUser: QueryResult<Token> = await client.query<Token>(
-        "SELECT * FROM tokens WHERE user_id = (SELECT id FROM accounts WHERE username = $1)",
-        [username]
-      );
-      if (existingUser.rows.length > 0) {
-        const existingToken = existingUser.rows[0].token;
-        await client.query("DELETE FROM tokens WHERE token $1", [
-          existingToken,
-        ]);
-      }
-
+      // Kontrollera om användarnamnet finns i accounts-tabellen
       const result: QueryResult<User> = await client.query<User>(
         "SELECT * FROM accounts WHERE username = $1",
         [username]
       );
 
+      // Om användarnamnet inte hittas, skicka status 404
       if (result.rows.length === 0) {
-        response.status(404).send("Invalid username or password");
+        console.log("User not found");
+        return response.status(404).send("Invalid username or password");
       }
 
       const user: User = result.rows[0];
 
+      // Jämför lösenordet
       const checkPassword: boolean = await bcrypt.compare(
         password,
         user.password
       );
 
+      // Om lösenordet inte matchar, skicka status 401
       if (!checkPassword) {
+        console.log("Invalid password");
         return response.status(401).send("Invalid password");
       }
 
+      // Kontrollera om användaren redan har en token
+      const existingTokenResult: QueryResult<Token> = await client.query<Token>(
+        "SELECT * FROM tokens WHERE user_id = $1",
+        [user.id]
+      );
+
+      // Om det finns en befintlig token, ta bort den
+      if (existingTokenResult.rows.length > 0) {
+        const existingToken = existingTokenResult.rows[0].token;
+        await client.query("DELETE FROM tokens WHERE token = $1", [
+          existingToken,
+        ]);
+      }
+
+      // Generera en ny token
       const token: string = uuidv4();
 
+      // Lägg till den nya token i databasen
       await client.query(
         "INSERT INTO tokens (user_id, token) VALUES ($1, $2)",
         [user.id, token]
       );
+
+      // Skicka tillbaka den nya token som en cookie
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
+        maxAge: 2592000, // Cookie giltig i 30 dagar
       });
-      response.status(201).send("Login successfull");
+
+      // Skicka status 201 för lyckad inloggning
+      response.status(201).send("Login successful");
     } catch (error) {
       console.error("Login Error", error);
       response.status(500).send("Server error at login");
