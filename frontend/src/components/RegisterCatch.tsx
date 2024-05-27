@@ -71,6 +71,7 @@ function RegisterCatch() {
 
       if (response.status === 201) {
         await closeModal();
+        window.location.reload();
       } else if (response.status === 401) {
         setError("Kunde inte hitta användarID");
       } else {

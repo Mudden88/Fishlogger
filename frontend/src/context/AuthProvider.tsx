@@ -27,25 +27,43 @@ const initialValue: IAuthContext = {
 
 const AuthContext = createContext<IAuthContext>(initialValue);
 
+const checkAuth = async (
+  token: string | null,
+  setLoggedIn: (loggedIn: boolean) => void,
+  setToken: Dispatch<SetStateAction<string | null>>
+) => {
+  try {
+    const response = await fetch(
+      `/api/get-cookie${token ? `?token=${token}` : ""}`,
+      {
+        credentials: "include",
+      }
+    );
+    if (response.ok) {
+      const result = await response.json();
+      if (result.cookie) {
+        setLoggedIn(true);
+        setToken(result.cookie);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const AuthProvider = ({ children }: Props) => {
   const [loggedIn, setLoggedIn] = useState(initialValue.loggedIn);
   const [token, setToken] = useState(initialValue.token);
 
   useEffect(() => {
-    if (loggedIn) {
-      fetch(`/api/get-cookie?token=${token}`, {
-        credentials: "include",
-      })
-        .then((response) => response.json())
-        .then((result) => {
-          if (result.cookie) {
-            setLoggedIn(true);
-            setToken(result.cookie);
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    checkAuth(token, setLoggedIn, setToken);
+  }, [token]);
+
+  useEffect(() => {
+    if (!loggedIn) {
+      setToken(null);
+    } else {
+      checkAuth(token, setLoggedIn, setToken);
     }
   }, [loggedIn, token]);
 
