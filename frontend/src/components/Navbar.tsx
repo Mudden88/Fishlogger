@@ -8,7 +8,7 @@ import { faFish } from "@fortawesome/free-solid-svg-icons";
 import "../index.css";
 
 function Navbar() {
-  const { token, loggedIn } = useContext(AuthContext);
+  const { token, setLoggedIn, loggedIn } = useContext(AuthContext);
 
   const handleLogout = async () => {
     try {
@@ -19,7 +19,7 @@ function Navbar() {
         .then((response) => {
           if (response.status === 200) {
             toast.success("Du är nu utloggad");
-            localStorage.clear();
+            setLoggedIn(false);
           }
         })
         .then(() => {

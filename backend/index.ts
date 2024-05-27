@@ -141,18 +141,23 @@ app.post(
         [username]
       );
       if (existingUser.rows.length > 0) {
-        return response.status(400).send("User is already logged in");
+        const existingToken = existingUser.rows[0].token;
+        await client.query("DELETE FROM tokens WHERE token $1", [
+          existingToken,
+        ]);
       }
 
       const result: QueryResult<User> = await client.query<User>(
         "SELECT * FROM accounts WHERE username = $1",
         [username]
       );
+
+      if (result.rows.length === 0) {
+        response.status(404).send("Invalid username or password");
+      }
+
       const user: User = result.rows[0];
 
-      if (!user) {
-        return response.status(404).send("Invalid username or password");
-      }
       const checkPassword: boolean = await bcrypt.compare(
         password,
         user.password
@@ -171,7 +176,6 @@ app.post(
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
-        maxAge: 2592000,
       });
       response.status(201).send("Login successfull");
     } catch (error) {
