@@ -135,42 +135,32 @@ app.post(
   async (request: Request<LoginReq>, response: Response) => {
     try {
       const { username, password } = request.body;
-      console.log(`Attempting to log in user: ${username}`);
 
-      // Kontrollera om användarnamnet finns i accounts-tabellen
       const result: QueryResult<User> = await client.query<User>(
         "SELECT * FROM accounts WHERE username = $1",
         [username]
       );
 
-      // Om användarnamnet inte hittas, skicka status 404
       if (result.rows.length === 0) {
-        console.log("User not found");
         return response.status(404).send("Invalid username or password");
       }
 
       const user: User = result.rows[0];
-      console.log(`Found user: ${user.username}`);
 
-      // Jämför lösenordet
       const checkPassword: boolean = await bcrypt.compare(
         password,
         user.password
       );
 
-      // Om lösenordet inte matchar, skicka status 401
       if (!checkPassword) {
-        console.log("Invalid password");
         return response.status(401).send("Invalid password");
       }
 
-      // Kontrollera om användaren redan har en token
       const existingTokenResult: QueryResult<Token> = await client.query<Token>(
         "SELECT * FROM tokens WHERE user_id = $1",
         [user.id]
       );
 
-      // Om det finns en befintlig token, ta bort den
       if (existingTokenResult.rows.length > 0) {
         const existingToken = existingTokenResult.rows[0].token;
         await client.query("DELETE FROM tokens WHERE token = $1", [
@@ -179,18 +169,15 @@ app.post(
         console.log(`Deleted existing token for user ${user.id}`);
       }
 
-      // Generera en ny token
       const token: string = uuidv4();
       console.log(`Generated new token for user ${user.id}`);
 
-      // Lägg till den nya token i databasen
       await client.query(
         "INSERT INTO tokens (user_id, token) VALUES ($1, $2)",
         [user.id, token]
       );
       console.log(`Inserted new token for user ${user.id}`);
 
-      // Skicka tillbaka den nya token som en cookie
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
