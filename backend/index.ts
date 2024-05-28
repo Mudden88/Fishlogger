@@ -19,7 +19,7 @@ client.connect();
 const app = express();
 
 const corsOption = {
-  origin: "https://fishlogger.onrender.com",
+  origin: "https://fishlogger.onrender.com" || "http://localhost:3000",
   credentials: true,
 };
 

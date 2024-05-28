@@ -4,7 +4,6 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  max-width: 700px;
   /* From https://css.glass */
   background: rgba(17, 15, 29, 0.322);
   border-radius: 10px;
@@ -17,6 +16,7 @@
 .formwrapper {
   display: flex;
   flex-direction: column;
+  width: fit-content;
 }
 
 .login,
@@ -26,7 +26,7 @@
 }
 
 label {
-  align-self: flex-end;
+  align-self: flex-start;
 }
 
 label input {

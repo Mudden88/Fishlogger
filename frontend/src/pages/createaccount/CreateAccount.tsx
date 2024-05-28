@@ -65,13 +65,16 @@ function CreateAccount() {
             <p className='create-account'>Skapa konto</p>
 
             <label>
-              Användarnamn: <input type='text' name='username' />
+              Användarnamn:
+              <br /> <input type='text' name='username' />
             </label>
             <label>
-              Email: <input type='email' name='email' />
+              Email:
+              <br /> <input type='email' name='email' />
             </label>
             <label>
               Lösenord:
+              <br />
               <input type='password' name='password' />
             </label>
             {error && <span className='errorMsg'>{error}</span>}

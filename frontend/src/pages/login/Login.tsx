@@ -60,12 +60,17 @@ function Login() {
             onSubmit={submitHandler}>
             <div className='formwrapper'>
               <p className='login'>Logga in</p>
+
               <label>
-                Användarnamn: <input type='text' name='username' />
+                Användarnamn:
+                <br /> <input type='text' name='username' />
               </label>
+
               <label>
-                Lösenord: <input type='password' name='password' />
+                Lösenord:
+                <br /> <input type='password' name='password' />
               </label>
+
               {error && <span className='errormsg'>{error}</span>}
               <input className='submitBtn' type='submit' value='Logga in' />
               <span className='text'>
