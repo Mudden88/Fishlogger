@@ -35,3 +35,15 @@
 .fishIco {
   transform: rotate(180deg);
 }
+
+@media screen and (max-width: 550px) {
+  .navList {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 390px) {
+  .fishlogger {
+    font-size: 42px;
+  }
+}
