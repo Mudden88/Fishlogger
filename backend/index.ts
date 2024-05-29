@@ -135,8 +135,6 @@ app.post(
   async (request: Request<LoginReq>, response: Response) => {
     try {
       const { username, password } = request.body;
-      console.log("Användarnamn:", username);
-
       if (!username || !password) {
         return response.status(400).send("Invalid inputs");
       }
@@ -167,6 +165,7 @@ app.post(
 
       if (existingTokenResult.rows.length > 0) {
         await client.query("DELETE FROM tokens WHERE user_id = $1", [user.id]);
+        return;
       }
 
       const token: string = uuidv4();
