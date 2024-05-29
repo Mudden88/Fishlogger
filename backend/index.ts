@@ -135,7 +135,6 @@ app.post(
   async (request: Request<LoginReq>, response: Response) => {
     try {
       const { username, password } = request.body;
-      console.log("Inloggningsförsök");
       console.log("Användarnamn:", username);
 
       if (!username || !password) {
@@ -167,10 +166,7 @@ app.post(
       );
 
       if (existingTokenResult.rows.length > 0) {
-        const existingToken = existingTokenResult.rows[0].token;
-        await client.query("DELETE FROM tokens WHERE token = $1", [
-          existingToken,
-        ]);
+        await client.query("DELETE FROM tokens WHERE user_id = $1", [user.id]);
       }
 
       const token: string = uuidv4();
@@ -182,9 +178,7 @@ app.post(
       response.cookie("token", token, {
         httpOnly: true,
         secure: true,
-        maxAge: 2592000,
       });
-
       response.status(201).send("Login successful");
     } catch (error) {
       console.error("Login Error", error);
