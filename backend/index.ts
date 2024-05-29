@@ -60,6 +60,7 @@ interface LoginReq {
 
 interface User {
   id: number;
+  user_id: number;
   username: string;
   password: string;
 }
@@ -145,6 +146,7 @@ app.post(
       );
 
       if (result.rows.length === 0) {
+        console.log("Ingen användare hittad");
         return response.status(404).send("Invalid username or password");
       }
 
@@ -165,7 +167,6 @@ app.post(
 
       if (existingTokenResult.rows.length > 0) {
         await client.query("DELETE FROM tokens WHERE user_id = $1", [user.id]);
-        return;
       }
 
       const token: string = uuidv4();
@@ -188,16 +189,10 @@ app.post(
 app.get("/api/get-cookie", async (request: Request, response: Response) => {
   try {
     const cookie: string | undefined = request.cookies.token;
-    const token = request.query.token;
 
-    if (token && !cookie) {
-      await client.query("DELETE FROM tokens WHERE token = $1", [token]);
-      return response.status(400).send("Token removed, cookie missing");
-    }
     if (!cookie) {
       return response.status(401).send("Unauthorized request");
     }
-
     response.status(200).send({ cookie });
   } catch (error) {
     console.error("Error getting cookie ", error);
