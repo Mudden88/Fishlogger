@@ -19,7 +19,7 @@ client.connect();
 const app = express();
 
 const corsOption = {
-  origin: "https://fishlogger.onrender.com" || "http://localhost:3000",
+  origin: ["https://fishlogger.onrender.com", `http://localhost:${PORT}`],
   credentials: true,
 };
 
@@ -135,6 +135,12 @@ app.post(
   async (request: Request<LoginReq>, response: Response) => {
     try {
       const { username, password } = request.body;
+      console.log("Inloggningsförsök");
+      console.log("Användarnamn:", username);
+
+      if (!username || !password) {
+        return response.status(400).send("Invalid inputs");
+      }
 
       const result: QueryResult<User> = await client.query<User>(
         "SELECT * FROM accounts WHERE username = $1",
@@ -146,7 +152,6 @@ app.post(
       }
 
       const user: User = result.rows[0];
-
       const checkPassword: boolean = await bcrypt.compare(
         password,
         user.password
@@ -187,7 +192,6 @@ app.post(
     }
   }
 );
-
 app.get("/api/get-cookie", async (request: Request, response: Response) => {
   try {
     const cookie: string | undefined = request.cookies.token;
