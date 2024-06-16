@@ -1,6 +1,6 @@
 # Välkommen till Fishlogger - Din digitala fiskelogg
 
-[Webbplats](https://fishlogger.onrender.com)
+### [Fishlogger](https://fishlogger.onrender.com)
 
 ## Registrera dina fiskefångster
 
